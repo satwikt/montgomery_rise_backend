@@ -1,0 +1,65 @@
+# ═══════════════════════════════════════════════════════════════════
+# Montgomery RISE — .gitignore
+# Python + HTML hackathon project
+# ═══════════════════════════════════════════════════════════════════
+
+# ── Secrets — NEVER commit these ─────────────────────────────────
+.env
+.env.*
+!.env.example
+secrets.json
+config.local.*
+
+# ── Python runtime ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environments ──────────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# ── pip & package build ───────────────────────────────────────────
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+
+# ── Generated data outputs ────────────────────────────────────────
+# Keep fallback JSONs — they're source code
+# Ignore generated run outputs
+hero_parcels.json
+parcel_candidates_live.json
+*.log
+run_output_*.json
+
+# ── OS junk ───────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+*~
+
+# ── Editor / IDE ──────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.pydevproject
+
+# ── Jupyter (if anyone uses notebooks) ───────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Test & coverage ───────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
