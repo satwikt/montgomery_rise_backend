@@ -31,7 +31,8 @@ import json
 import time
 import os
 from datetime import datetime
-
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 # ═══════════════════════════════════════════════════════════════════
 # CONFIG
 # ═══════════════════════════════════════════════════════════════════

@@ -44,18 +44,366 @@ A planner clicks a parcel. They get:
 montgomery-rise/
 │
 ├── rise_selector_v3.py            # Core pipeline — 8-dimension scorer + ArcGIS + Flood + 311 + Gemini
+├── api.py                         # FastAPI server — exposes pipeline as REST endpoints
 ├── parcel_finder.py               # GIS candidate finder (used pre-hackathon to select hero parcels)
 ├── parcel_candidates.json         # Output from parcel_finder — top GIS candidates
 │
-├── montgomery-rise-demo-v2.html   # Main demo UI — parcel cards + recommendations + chatbot
+├── demo_3.html                    # Main demo UI — parcel cards + recommendations + chatbot
 ├── rise_footprint.html            # Standalone foot traffic module (ArcGIS visualiser)
 ├── parcel_review.html             # Parcel review UI (used during candidate selection)
 │
-├── requirements.txt               # Python dependencies (just: requests)
+├── requirements.txt               # Python dependencies
 ├── .env.example                   # Environment variable template
 ├── .gitignore
 └── README.md
 ```
+
+---
+
+## Installation
+
+### Prerequisites
+
+- Python 3.9 or higher
+- pip
+- A free Gemini API key from [aistudio.google.com](https://aistudio.google.com) (no credit card required, 500 requests/day)
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-team/montgomery-rise.git
+cd montgomery-rise
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+`requirements.txt` includes:
+
+```
+requests        # ArcGIS + Gemini HTTP calls
+fastapi         # API server
+uvicorn[standard]  # ASGI server to run FastAPI
+python-dotenv   # Load .env into environment
+```
+
+### 3. Configure your environment
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and add your Gemini key:
+
+```env
+GEMINI_API_KEY=your_gemini_key_here
+```
+
+All other data sources (ArcGIS foot traffic, flood risk, 311 distress) are free public endpoints — no key needed.
+
+---
+
+## Running the Application
+
+RISE has two runnable entry points — the **API server** (needed for the live demo UI) and the **standalone scoring pipeline** (CLI, outputs JSON).
+
+### Option A — Full stack: API + Demo UI (recommended)
+
+**Step 1: Start the API server**
+
+```bash
+uvicorn api:app --reload --port 8000
+```
+
+The server starts at `http://localhost:8000`. You should see:
+
+```
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process
+```
+
+**Step 2: Open the demo UI**
+
+Open `demo_3.html` in your browser (double-click the file, or serve it locally):
+
+```bash
+# Option 1 — direct file open (works for local dev)
+open demo_3.html
+
+# Option 2 — simple local server (avoids any CORS edge cases)
+python -m http.server 3000
+# then visit http://localhost:3000/demo_3.html
+```
+
+The demo will auto-connect to `http://localhost:8000`. The status indicator in the top-right corner will switch from `OFFLINE` to `LIVE` once the API is running. If Gemini is configured, it will show `gemini live`.
+
+**Step 3: Click any parcel card**
+
+The UI calls `GET /parcels/{id}/score`, runs the full pipeline live, and renders the results. The first request takes 3–8 seconds (ArcGIS + Gemini round trips). Subsequent requests for the same parcel are served from the browser cache.
+
+---
+
+### Option B — Standalone scoring pipeline (CLI only)
+
+Runs the pipeline for all 3 hero parcels and saves results to `hero_parcels.json`. Does not start the API server.
+
+```bash
+python rise_selector_v3.py
+```
+
+**Sample output:**
+```
+══════════════════════════════════════════════════════════════
+  MONTGOMERY RISE — Hero Parcel Scorer v3
+══════════════════════════════════════════════════════════════
+  HERO PARCEL 1: Parcel A — Heritage
+  Commerce Street, Montgomery, Alabama 36104
+  ────────────────────────────────────────────────────────────
+  [ARCGIS] ✅ 5 locations returned
+  [ARCGIS]    Foot traffic score : 73/100
+  [FLOOD]  ✅ Zone: X  →  🟢 Low Flood Risk
+  [311]       Density: 12.4/sq mi  →  🟡 Moderate Distress
+
+  Scores:
+    Heritage   : 78/100   [+25pts — within 0.5mi of Rosa Parks Museum]
+    Industrial : 81/100   [anchor: MGMix (IX)]
+    Activity   : 73/100   [ArcGIS foot traffic]
+    Proximity  : 92/100
+    Economic   : 32/100
+    Vacancy    : 70/100
+    Flood      : 5/5
+    311        : 4/10
+    ────────────────────────────────────────────────────────────
+    FINAL      : 74/100
+
+  [AI] ✅ 3 recommendations
+    #1 Civil Rights Heritage Plaza   — 78/100 — Mid-Term $500K–$5M
+       🔑 USDA VAPG open 41 days — 50% coverage
+    #2 Community Cultural Centre     — 70/100 — Mid-Term $500K–$5M
+       🔑 USDA Rural Dev Q3 open 26 days — 70% coverage
+    #3 Pocket Park & Public Art      — 55/100 — Quick Win <$500K
+```
+
+Output saved to `hero_parcels.json`.
+
+---
+
+### Option C — No Gemini key (mock mode)
+
+If `GEMINI_API_KEY` is not set, both the API server and the CLI pipeline run in **mock mode** — all scoring dimensions are fully live (ArcGIS, flood, 311), but AI recommendations are generated from the score data locally instead of calling Gemini. The demo UI works end-to-end in mock mode.
+
+---
+
+## REST API
+
+The FastAPI server (`api.py`) exposes 4 endpoints. Interactive docs are available at **`http://localhost:8000/docs`** once the server is running.
+
+### Base URL
+
+```
+http://localhost:8000
+```
+
+---
+
+### GET `/`
+
+Health check. Returns API status and whether Gemini is configured. This is the endpoint the demo UI polls to display `LIVE` vs `OFFLINE`.
+
+**Response**
+```json
+{
+  "status": "ok",
+  "service": "Montgomery RISE API",
+  "version": "3.0.0",
+  "gemini": "configured",
+  "parcels": 3,
+  "timestamp": "2026-03-06T14:22:01Z"
+}
+```
+
+`gemini` is `"configured"` when a valid key is present, `"mock"` otherwise.
+
+---
+
+### GET `/parcels`
+
+Lists all 3 hero parcels with lightweight metadata. No scoring is run — fast response, no external calls.
+
+**Response**
+```json
+{
+  "parcels": [
+    {
+      "id": "A",
+      "label": "Parcel A — Heritage",
+      "story": "Heritage",
+      "address": "Commerce Street, Montgomery, Alabama 36104",
+      "parcel_id": "11 01 12 4 004 001.000",
+      "acres": 8.34,
+      "zone_context": "heritage",
+      "nearest_anchor": "Rosa Parks Museum",
+      "min_dist_miles": 0.154,
+      "open_grants": 2,
+      "coords": { "lat": 32.37894, "lon": -86.31094 }
+    }
+    // ... Parcel B, Parcel C
+  ]
+}
+```
+
+---
+
+### GET `/parcels/{id}/score`
+
+Runs the full RISE pipeline for one of the 3 hero parcels. `id` is `A`, `B`, or `C` (case-insensitive).
+
+**Pipeline steps executed:**
+1. ArcGIS foot traffic query (Most Visited Locations, 1-mile radius)
+2. Montgomery OneView flood hazard lookup
+3. Montgomery 311 service-request density (90-day window)
+4. 8-dimension scorer
+5. Gemini 2.5 Pro recommendations (or mock if no key)
+
+**Example**
+```
+GET /parcels/A/score
+GET /parcels/b/score
+```
+
+**Response shape**
+```json
+{
+  "label": "Parcel A — Heritage",
+  "story": "Heritage",
+  "address": "Commerce Street, Montgomery, Alabama 36104",
+  "zone_context": "heritage",
+  "acres": 8.34,
+  "scores": {
+    "final": 74,
+    "heritage": 78,
+    "industrial": 81,
+    "activity": 73,
+    "proximity": 92,
+    "economic": 32,
+    "vacancy": 70,
+    "flood": 5,
+    "distress": 4,
+    "urgency": "medium",
+    "heritage_boost": "+25pts — within 0.5mi of Rosa Parks Museum",
+    "heritage_anchor": "Rosa Parks Museum",
+    "industrial_anchor": "MGMix (IX)"
+  },
+  "flood_risk": {
+    "score": 5,
+    "zone": "X",
+    "label": "🟢 Low Flood Risk"
+  },
+  "distress_311": {
+    "score": 4,
+    "density_per_sq_mi": 12.4,
+    "total_calls_90days": 14,
+    "top_complaints": [
+      { "type": "Overgrown Grass", "count": 5 },
+      { "type": "Illegal Dumping", "count": 3 }
+    ],
+    "label": "🟡 Moderate Distress"
+  },
+  "foot_traffic": {
+    "score": 73,
+    "location_count": 5,
+    "total_visits": 26470,
+    "nearest_name": "Rosa Parks Museum",
+    "nearest_dist_mi": 0.16,
+    "source": "arcgis",
+    "top_locations": [ ... ]
+  },
+  "grant_flags": [ ... ],
+  "health_flags": { "food_insecurity_pct": 28, "asthma_rate_multiplier": 1.6 },
+  "ai_analysis": {
+    "urgency_flag": "medium",
+    "one_line_summary": "Heritage-priority parcel — 0.15mi from Rosa Parks Museum.",
+    "ai_source": "gemini-2.5-pro",
+    "recommendations": [
+      {
+        "rank": 1,
+        "name": "Civil Rights Heritage Plaza",
+        "fit_score": 78,
+        "explanation": "...",
+        "cost_tier": "Mid-Term $500K–$5M",
+        "grant_flag": "USDA VAPG open 41 days — 50% coverage"
+      }
+    ]
+  },
+  "meta": {
+    "generated_at": "2026-03-06T14:22:05Z",
+    "pipeline": "RISE v3 — ArcGIS + Gemini 2.5 Pro",
+    "pipeline_ms": 4821
+  }
+}
+```
+
+**Errors**
+
+| Status | Condition |
+|---|---|
+| `404` | Parcel ID not `A`, `B`, or `C` |
+| `500` | Unexpected pipeline failure (all external calls have fallbacks, so this should not occur) |
+
+---
+
+### POST `/parcels/custom`
+
+Runs the full pipeline for any parcel defined by lat/lon. Useful for planners exploring parcels outside the 3 hero set.
+
+The nearest anchor is auto-detected from the RISE anchor catalogue (Rosa Parks Museum, The Legacy Museum, MGMix IX, Maxwell AFB Gate, ASU Campus).
+
+**Request body**
+```json
+{
+  "lat": 32.3789,
+  "lon": -86.3109,
+  "label": "My Custom Parcel",
+  "story": "Economic Urgency",
+  "address": "123 Main St, Montgomery AL 36104",
+  "parcel_id": "CUSTOM-001",
+  "acres": 2.5,
+  "owner": "City of Montgomery",
+  "zone_context": "food_desert",
+  "health_flags": {
+    "food_insecurity_pct": 35,
+    "asthma_rate_multiplier": 1.8
+  },
+  "grant_flags": [
+    {
+      "name": "USDA Rural Economic Development Q3",
+      "status": "open",
+      "days_remaining": 26,
+      "eligibility_pct": 70,
+      "match": "20%"
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `lat` | float | ✅ | — | WGS84 latitude |
+| `lon` | float | ✅ | — | WGS84 longitude |
+| `label` | string | | `"Custom Parcel"` | Display name |
+| `story` | string | | `"Custom"` | Narrative tag |
+| `address` | string | | `"Montgomery, Alabama"` | Human-readable address |
+| `parcel_id` | string | | `"CUSTOM-001"` | GIS parcel identifier |
+| `acres` | float | | `1.0` | Parcel size in acres |
+| `owner` | string | | `"City of Montgomery"` | Parcel owner |
+| `zone_context` | string | | `"heritage"` | `heritage` · `ix_hub` · `food_desert` |
+| `health_flags` | object | | `{}` | Community health indicators |
+| `grant_flags` | array | | `[]` | Open grant windows |
+
+**Response** — same shape as `GET /parcels/{id}/score`.
 
 ---
 
@@ -116,9 +464,9 @@ Density ≤ 10                        →   2 pts  🟢 Low
 
 ---
 
-## APIs Used
+## External Data Sources
 
-All APIs except Gemini are **free with no key required**.
+All sources except Gemini are **free with no key required**.
 
 ### ArcGIS — Most Visited Locations
 ```
@@ -177,72 +525,33 @@ Cost: ~$0.004 total for 3 parcels (well within free tier: 500 req/day)
 | Grant Data | Grants.gov API | Free, no key |
 | Parcel Data | Montgomery GIS + Nominatim | City-owned parcel geometries |
 | RAG Chatbot | ChromaDB + Sentence Transformers | Montgomery parcel knowledge base |
-| Backend | FastAPI / Flask | Python — serves scoring engine + API calls |
-| Frontend | HTML + CSS + Vanilla JS | No framework — prototype ready |
+| Backend | FastAPI + Uvicorn | Python — `api.py` serves scoring engine |
+| Frontend | HTML + CSS + Vanilla JS | No framework — `demo_3.html` |
 | Deployment | Render / Railway | Free tier — one-command deploy from GitHub |
 
 ---
 
-## Quickstart
+## Deployment
 
-### 1. Clone and install
+### Render (recommended for free hosting)
 
-```bash
-git clone https://github.com/your-team/montgomery-rise.git
-cd montgomery-rise
-pip install -r requirements.txt
-```
+1. Push the repo to GitHub
+2. Create a new **Web Service** on [render.com](https://render.com)
+3. Set the build command: `pip install -r requirements.txt`
+4. Set the start command: `uvicorn api:app --host 0.0.0.0 --port $PORT`
+5. Add environment variable: `GEMINI_API_KEY=your_key_here`
+6. Update the API URL field in `demo_3.html` (or the UI bar) to your Render URL
 
-### 2. Set your API key
-
-```bash
-cp .env.example .env
-# Edit .env:
-# GEMINI_API_KEY=your_key_here
-```
-
-Get a free Gemini key at [aistudio.google.com](https://aistudio.google.com) — no credit card, 500 requests/day.
-
-### 3. Run the scoring pipeline
+### Railway
 
 ```bash
-python rise_selector_v3.py
+railway login
+railway init
+railway up
+railway variables set GEMINI_API_KEY=your_key_here
 ```
 
-**Sample output:**
-```
-══════════════════════════════════════════════════════════════
-  MONTGOMERY RISE — Hero Parcel Scorer v3
-══════════════════════════════════════════════════════════════
-  HERO PARCEL 1: Parcel A — Heritage
-  Commerce Street, Montgomery, Alabama 36104
-  ────────────────────────────────────────────────────────────
-  [ARCGIS] ✅ 5 locations returned
-  [ARCGIS]    Foot traffic score : 73/100
-  [FLOOD]  ✅ Zone: X  →  🟢 Low Flood Risk
-  [311]       Density: 12.4/sq mi  →  🟡 Moderate Distress
-
-  Scores:
-    Heritage   : 78/100   [+25pts — within 0.5mi of Rosa Parks Museum]
-    Industrial : 81/100   [anchor: MGMix (IX)]
-    Activity   : 73/100   [ArcGIS foot traffic]
-    Proximity  : 92/100
-    Economic   : 32/100
-    Vacancy    : 70/100
-    Flood      : 5/5
-    311        : 4/10
-    ────────────────────────────────────────────────────────────
-    FINAL      : 74/100
-
-  [AI] ✅ 3 recommendations
-    #1 Civil Rights Heritage Plaza   — 78/100 — Mid-Term $500K–$5M
-       🔑 USDA VAPG open 41 days — 50% coverage
-    #2 Community Cultural Centre     — 70/100 — Mid-Term $500K–$5M
-       🔑 USDA Rural Dev Q3 open 26 days — 70% coverage
-    #3 Pocket Park & Public Art      — 55/100 — Quick Win <$500K
-```
-
-Output saved to `hero_parcels.json`.
+Set start command to: `uvicorn api:app --host 0.0.0.0 --port $PORT`
 
 ---
 
@@ -283,6 +592,12 @@ GEMINI_API_KEY=your_gemini_key_here
 # All other APIs are free public endpoints — no key needed
 # ArcGIS foot traffic, flood risk, 311 distress, Grants.gov
 ```
+
+---
+
+## Known Issues
+
+- **`transit_label` bug in `rise_selector_v3.py` line 793** — the prompt builder references `scores['transit_label']` but the correct key is `scores['destress_label']`. The API server (`api.py`) works around this; fix the line in the original script if running the CLI pipeline with Gemini enabled.
 
 ---
 
