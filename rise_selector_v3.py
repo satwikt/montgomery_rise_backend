@@ -791,7 +791,7 @@ RISE SCORES (already computed — explain these, do not recalculate):
 - Economic score:   {scores['economic']}/100
 - Vacancy score:    {scores['vacancy']}/100
 - Flood score:      {scores['flood']}/5  [{scores['flood_label']}]
-- 311 score:    {scores['distress']}/5  [{scores['transit_label']}]
+- 311 score:    {scores['distress']}/5  [{scores['destress_label']}]
 - FINAL SCORE:      {scores['final']}/100
 
 ARCGIS FOOT TRAFFIC (real Montgomery data — Most Visited Locations within 1 mile):
