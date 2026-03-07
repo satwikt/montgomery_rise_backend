@@ -1,0 +1,81 @@
+{
+  "generated": "2026-03-07T01:07:36.595052Z",
+  "pipeline": "Montgomery RISE \u2014 Crime Mapping",
+  "radius_miles": 1,
+  "days_back": 90,
+  "api_endpoint": "https://services3.arcgis.com/dty2kHktVXHrqO8i/ArcGIS/rest/services/Crime_Incidents/FeatureServer/0/query",
+  "parcels": [
+    {
+      "label": "Parcel A \u2014 Heritage",
+      "address": "Commerce Street, Montgomery, Alabama 36104",
+      "coords": {
+        "lat": 32.37894285621073,
+        "lon": -86.31094342590941
+      },
+      "radius_miles": 1,
+      "days_analyzed": 90,
+      "total_incidents": 0,
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "other": 0,
+        "unknown": 0
+      },
+      "crime_score": 0,
+      "crime_label": "\ud83d\udfe2 Low Crime Risk",
+      "top_crime_types": [],
+      "incidents": [],
+      "source": "live",
+      "queried_at": "2026-03-07T01:07:36.059864Z"
+    },
+    {
+      "label": "Parcel B \u2014 IX Hub",
+      "address": "643 Kimball Street, Montgomery, Alabama 36108",
+      "coords": {
+        "lat": 32.3683555135919,
+        "lon": -86.3438915584216
+      },
+      "radius_miles": 1,
+      "days_analyzed": 90,
+      "total_incidents": 0,
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "other": 0,
+        "unknown": 0
+      },
+      "crime_score": 0,
+      "crime_label": "\ud83d\udfe2 Low Crime Risk",
+      "top_crime_types": [],
+      "incidents": [],
+      "source": "live",
+      "queried_at": "2026-03-07T01:07:36.285077Z"
+    },
+    {
+      "label": "Parcel C \u2014 Food Desert",
+      "address": "Coosa Street, Montgomery, Alabama 36104",
+      "coords": {
+        "lat": 32.37918972033555,
+        "lon": -86.30866571125091
+      },
+      "radius_miles": 1,
+      "days_analyzed": 90,
+      "total_incidents": 0,
+      "severity_counts": {
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "other": 0,
+        "unknown": 0
+      },
+      "crime_score": 0,
+      "crime_label": "\ud83d\udfe2 Low Crime Risk",
+      "top_crime_types": [],
+      "incidents": [],
+      "source": "live",
+      "queried_at": "2026-03-07T01:07:36.594300Z"
+    }
+  ]
+}
