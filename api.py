@@ -27,7 +27,6 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException, Path
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from rise_rag.chatbot import RiseChatbot
 
 # ── load .env if present (python-dotenv is optional) ─────────────────────────
 try:
@@ -63,7 +62,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
-app.include_router(chat_router)
+
 # Allow the HTML demo (served from any origin) to call the API
 app.add_middleware(
     CORSMiddleware,
@@ -72,6 +71,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from chat_endpoint import router as chat_router
+app.include_router(chat_router)
 # ─────────────────────────────────────────────────────────────────────────────
 # PARCEL ID → INDEX MAP
 # ─────────────────────────────────────────────────────────────────────────────

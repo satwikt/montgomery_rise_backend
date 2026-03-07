@@ -4,7 +4,12 @@ Edit this file to change models, paths, and tuning parameters.
 """
 
 from pathlib import Path
+from pydantic_settings import BaseSettings
 
+class Settings(BaseSettings):
+    class Config:
+        extra = "ignore"   # ← add this line
+        env_file = ".env"
 # ─── Paths ────────────────────────────────────────────────────────────────────
 
 # Root of the project (parent of the rise_rag package dir)
