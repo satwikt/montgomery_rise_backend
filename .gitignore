@@ -63,3 +63,7 @@ desktop.ini
 .coverage
 htmlcov/
 coverage.xml
+
+venvRise/
+.venvRise/
+chroma_db/

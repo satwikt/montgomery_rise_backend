@@ -1,0 +1,131 @@
+DOCUMENT: RISE Data Sources — Full Explainer
+PARCEL_ID: general
+TOPIC: data_sources_overview
+---
+RISE uses five external data sources and one AI model. Every data source is either free and publicly available, or falls within a free usage tier. No proprietary data is used. Every number displayed in RISE is traceable to a specific API endpoint and field name. This section explains each source, what it provides, and how RISE uses it.
+
+---
+DOCUMENT: Data Source — ArcGIS Most Visited Locations
+PARCEL_ID: general
+TOPIC: data_arcgis_foot_traffic
+---
+Source name: Montgomery Most Visited Locations
+Provider: City of Montgomery, served via ArcGIS FeatureServer
+Cost: Free. No API key required.
+Endpoint: https://services7.arcgis.com/xNUwUjOJqYE54USz/arcgis/rest/services/Most_Visited_Locations/FeatureServer/0/query
+
+What it contains: A spatial dataset of named locations across Montgomery that have been visited and tracked by the city. Each record has: Name (location name), Address, F__of_Visits (total recorded visit count), and geometry (latitude/longitude coordinates).
+
+How RISE queries it: For each hero parcel, RISE sends the parcel's latitude and longitude as the centre point of a spatial query, with a radius of 5,280 feet (1 mile). The API returns all named locations within that radius. RISE then computes the Haversine distance from the parcel to each location, applies a proximity weight (1.0 for under 0.25 miles, down to 0.2 for over 0.75 miles), and calculates the weighted foot traffic score.
+
+Why it replaces Bright Data / Google SERP: Earlier versions of RISE used Bright Data's SERP API to scrape Google Maps popular times data. The ArcGIS Most Visited Locations data is superior because: (1) it is the city's own data, not scraped from a third party; (2) it is free with no API key; (3) it directly answers the question of where people actually go in Montgomery; (4) it is more credible to present to judges and planners. The switch was made after the Bright Data integration was designed but before live deployment.
+
+Fallback: If the ArcGIS endpoint is unreachable, RISE uses pre-researched fallback visit counts for the three zone types (heritage, ix_hub, food_desert). The fallback data was compiled from Google Maps publicly visible visit estimates. The chatbot will note if fallback data is in use.
+
+---
+DOCUMENT: Data Source — Montgomery Flood Hazard Areas
+PARCEL_ID: general
+TOPIC: data_flood_hazard
+---
+Source name: Montgomery OneView Flood Hazard Areas
+Provider: City of Montgomery, served via ArcGIS FeatureServer (Montgomery GIS)
+Cost: Free. No API key required.
+Endpoint: https://gis.montgomeryal.gov/server/rest/services/OneView/Flood_Hazard_Areas/FeatureServer/0/query
+
+What it contains: FEMA National Flood Hazard Layer (NFHL) data served through Montgomery's GIS system. Each record represents a flood zone polygon with fields: FLD_ZONE (flood zone designation), FLOODWAY (floodway designation), SFHA_TF (Special Flood Hazard Area true/false), ZONE_SUBTY (zone subtype).
+
+How RISE queries it: RISE sends the parcel's coordinates as a point and queries which flood zone polygon the point falls within (spatial intersect query). The FLD_ZONE field is read and mapped to a risk score.
+
+FEMA flood zone codes explained:
+- Zone AE: Base Flood Elevation determined. High risk — 1% annual chance of flooding (100-year flood). Development requires flood insurance and elevation certificates.
+- Zone A: High risk but no Base Flood Elevation established. Similar risk to AE.
+- Zone AH, AO: High risk — shallow flooding or sheet flow areas.
+- Zone VE, V: Coastal high hazard. Not applicable to inland Montgomery.
+- FLOODWAY: The channel of a river plus the adjacent land needed to carry the 100-year flood. Highest risk category.
+- Zone X500 / B / C: Moderate risk — 0.2% annual chance of flooding (500-year flood).
+- Zone X: Minimal risk. Areas outside the 100-year and 500-year floodplain. Standard building codes apply without flood-specific requirements.
+- Zone D: Undetermined risk. Rarely seen in Montgomery.
+
+Why it matters for development: Zone AE or A parcels face significantly higher development costs due to flood-proofing requirements, mandatory flood insurance, and potential liability. Zone X parcels have no flood-specific building requirements. All three RISE hero parcels fall in Zone X.
+
+This data source was added based on mentor feedback from Haley at Alabama State University, who suggested adding flood risk flags as a quick win improvement to the scoring model.
+
+---
+DOCUMENT: Data Source — Montgomery 311 Service Requests
+PARCEL_ID: general
+TOPIC: data_311
+---
+Source name: Montgomery 311 Service Requests (Received_311_Service_Request)
+Provider: City of Montgomery, served via ArcGIS MapServer
+Cost: Free. No API key required.
+Endpoint: https://gis.montgomeryal.gov/server/rest/services/HostedDatasets/Received_311_Service_Request/MapServer/0/query
+
+What is 311? 311 is Montgomery's non-emergency municipal service request line. Residents call or submit requests online to report issues that require city attention: overgrown grass on vacant lots, illegal dumping, potholes, broken streetlights, abandoned vehicles, and building code violations. The 311 system is the primary channel through which residents communicate the condition of their neighbourhood to the city.
+
+What it contains: Each record represents one service request with fields: Request_Type, Status, Create_Date, Department (which city department handles the request).
+
+How RISE queries it: RISE queries requests within 0.5 miles of each parcel, filtered to the last 90 days (approximately one season of data). It counts total requests, calculates density per square mile, identifies the top 3 complaint types, and checks whether vacant-lot-related complaints (Overgrown Grass, Illegal Dumping, Vacant Building, Debris) exceed 30% of total calls.
+
+Why 90 days? Ninety days captures current conditions without including seasonal variation that might distort the picture. A single summer of unusually heavy rainfall, for example, might inflate drainage-related calls. Ninety days is the most defensible window for current neighbourhood condition.
+
+Why the vacant-lot bonus? When more than 30% of 311 calls near a parcel are specifically about the parcel's condition — overgrown grass, dumping, vacant buildings — it means the community is directly and repeatedly flagging this specific piece of land. This is the strongest possible signal that the community wants action. The +2 bonus in the distress score reflects this elevated urgency.
+
+This data source was also added based on Haley's mentor feedback recommending 311 call density as a community distress signal.
+
+---
+DOCUMENT: Data Source — Grants.gov API
+PARCEL_ID: general
+TOPIC: data_grants_gov
+---
+Source name: Grants.gov Search API
+Provider: US federal government grants management system
+Cost: Free. No API key required.
+Endpoint: https://api.grants.gov/v1/api/search2
+
+What it contains: The federal government's central repository for grant opportunities. All federal agencies are required to post competitive grant opportunities on Grants.gov. Records include: opportunity title, funding agency, posted date, close date, funding amount, eligibility, and description.
+
+How RISE uses it: RISE queries Grants.gov for open opportunities relevant to community development, food access, workforce development, and economic development in rural and low-income communities. The grant deadlines, coverage percentages, and match requirements shown in RISE are sourced from Grants.gov listings and cross-referenced with programme documentation from USDA Rural Development and HUD.
+
+Grant verification: The two open grants displayed in RISE — USDA Rural Economic Development Q3 and USDA Value Added Producer Grant — have been verified against Grants.gov listings and the USDA Rural Development Alabama state office programme pages. The deadlines (March 31 and April 15, 2026) and coverage percentages (70–75% and 50%) are accurate as of March 6, 2026.
+
+Days remaining calculation: RISE computes days remaining as the difference between the grant deadline date and the current date at the time the pipeline is run. This is a live calculation — the number will decrease each day the pipeline is run.
+
+---
+DOCUMENT: Data Source — Gemini 2.5 Pro AI
+PARCEL_ID: general
+TOPIC: data_gemini
+---
+Model: Google Gemini 2.5 Pro
+Provider: Google AI Studio / Google Generative AI API
+Cost: Free tier — 500 requests per day at aistudio.google.com. No credit card required for the free tier. Paid tier: $1.25 per 1 million input tokens, $10.00 per 1 million output tokens. Total cost for 3 parcels: approximately $0.004 — well within the free tier.
+Endpoint: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent
+
+What Gemini does in RISE: After the scoring engine computes all 8 dimension scores for a parcel, Gemini receives a structured prompt containing: the parcel address and physical details, all 8 dimension scores with their explanations, the ArcGIS foot traffic data (top locations, visit counts, foot traffic score), the open grant windows (name, deadline, coverage %), and the community health flags. Gemini's task is to generate the top 3 land reuse recommendations in plain English — explaining the scores rather than recalculating them.
+
+Why JSON mode? RISE uses Gemini's responseMimeType=application/json setting, which forces the model to return clean, parseable JSON without markdown fences or conversational preamble. This means RISE can directly parse and display Gemini's output without post-processing string cleaning. The response schema is fixed: an array of 3 recommendations, each with rank, name, fit_score, explanation, cost_tier, and grant_flag, plus a one_line_summary and urgency_flag.
+
+Temperature setting: RISE uses temperature 0.3 (range 0–1). Lower temperature produces more consistent, fact-grounded responses. Higher temperature produces more creative but less predictable output. 0.3 was chosen to ensure that Gemini's recommendations reliably reflect the scores it receives rather than inventing unrelated ideas.
+
+What Gemini does NOT do: Gemini does not look up current data, call external APIs, or verify facts. It receives all data as input from the RISE scoring engine and speaks to that data. If the scoring engine provides a fallback value, Gemini receives the fallback and generates recommendations accordingly. Gemini is the voice of RISE, not the brain — the scoring engine is the brain.
+
+Fallback: If the Gemini API key is not set, RISE uses a deterministic mock analysis function (_mock_ai_analysis) that generates pre-written recommendations based on the zone_context and score values. The mock output is clearly labelled in the pipeline log.
+
+---
+DOCUMENT: Data Source — Montgomery GIS Parcel Data
+PARCEL_ID: general
+TOPIC: data_montgomery_gis
+---
+Source name: Montgomery GIS Parcel Layer
+Provider: City of Montgomery GIS, served via ArcGIS MapServer
+Cost: Free. No API key required.
+Endpoint: https://gis.montgomeryal.gov/server/rest/services/Parcels/MapServer/0/query
+
+What it contains: All parcels in Montgomery with attributes including: ParcelNo (parcel identifier), OwnerName, MailAddress1, MailCity, MailZip, Calc_Acre (acreage), Neighbourhood, and polygon geometry.
+
+How hero parcels were selected: Before the hackathon, RISE ran parcel_finder.py, which queried all city-owned parcels (filtered by OwnerName containing "CITY OF MONTGOMERY"), extracted their coordinates from the polygon geometry, computed Haversine distances to each of the 5 anchor points, and ranked parcels by minimum distance to any anchor. The top candidates were reviewed and the three hero parcels were selected based on their proximity to different anchor types — heritage, military/IX, and food desert zone.
+
+ImpValue field and vacancy detection: The improvement value field (ImpValue) records the assessed value of structures on the parcel. A value of $0 means the city's assessment records show no structures — the parcel is almost certainly vacant land. All three hero parcels have ImpValue = $0.
+
+Geocoding: Parcel addresses were reverse-geocoded using the Nominatim API (OpenStreetMap's free reverse geocoding service) to convert parcel coordinates to street addresses. Address source is noted as "geocoded" in the hero parcel data.
+
+In the current version of RISE (v3): The parcel_finder.py GIS pull is no longer called at runtime. The three hero parcels are hardcoded in HERO_PARCELS with the GIS-verified coordinates and attributes. This eliminates a network dependency during the demo and ensures the scoring pipeline always has valid input regardless of GIS server availability.
