@@ -10,5 +10,10 @@ sentence-transformers>=3.0.0
 # HTTP client for Ollama API
 requests>=2.31.0
 
-# Rich terminal output
+# Rich terminal output for CLI
 rich>=13.0.0
+
+# Web API server
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.0.0
