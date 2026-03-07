@@ -1,0 +1,14 @@
+# RISE RAG Chatbot — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# Vector database
+chromadb>=0.5.0
+
+# Local embeddings (free, no API key needed)
+sentence-transformers>=3.0.0
+
+# HTTP client for Ollama API
+requests>=2.31.0
+
+# Rich terminal output
+rich>=13.0.0

@@ -1,0 +1,156 @@
+DOCUMENT: RISE Scoring Engine — Full Explanation
+PARCEL_ID: general
+TOPIC: scoring_engine
+---
+RISE scores every city-owned vacant parcel across 8 dimensions. Each dimension is scored 0–100 (except flood risk, which is 0–5), weighted, and summed to produce a final score out of 100. The weights reflect the priority order established by the RISE team based on Montgomery's specific economic development goals.
+
+WHAT RISE IS:
+RISE stands for Revitalization Intelligence and Smart Empowerment. It is a decision-support tool that takes city-owned vacant land and recommends the highest-impact reuse options based on real data. It is not a real estate appraisal tool — it measures community impact potential, not market value. Every number in RISE is traceable to a public data source.
+
+---
+DOCUMENT: Scoring — Heritage Dimension
+PARCEL_ID: general
+TOPIC: scoring_heritage
+---
+Heritage score weight: 25% of final score. This is the highest-weighted dimension.
+
+What it measures: Proximity to civil rights landmarks — specifically the Rosa Parks Museum and The Legacy Museum. Montgomery is a nationally significant civil rights heritage city. RISE prioritises parcels near these landmarks for cultural and community uses because the heritage tourism economy is real, measurable, and growing.
+
+How it is calculated:
+- If a parcel is within 0.5 miles of Rosa Parks Museum: score = 25 + 75 × (1 - distance/0.5). Maximum 100. The +25 is the heritage boost.
+- If a parcel is within 0.5 miles of The Legacy Museum: score = 20 + 75 × (1 - distance/0.5). Maximum 100. The +20 is the heritage boost.
+- If a parcel is between 0.5 and 1.0 miles from a heritage landmark: score = 40 × (1 - (distance - 0.5)/0.5). Partial credit.
+- If a parcel is beyond 1.0 miles from all heritage landmarks: score = 5. Minimum floor.
+- The best score across all heritage anchors is used.
+
+Heritage boost explained: The heritage boost is RISE's most distinctive feature. It is not a bonus on top of the score — it is built into the formula. A parcel 0.1 miles from the Rosa Parks Museum scores approximately 95 on heritage, which contributes 23.75 points to the final score (95 × 0.25). Without the boost, a parcel at the same location might score 70 on heritage, contributing 17.5 points. The 6.25 point difference in the final score is enough to change the recommendation ranking. This is intentional: RISE was designed to surface cultural and community uses above purely economic ones when civil rights heritage is nearby.
+
+Civil rights heritage anchors used by RISE:
+- Rosa Parks Museum, 252 Montgomery Street. Heritage boost: +25pts. Boost radius: 0.5 miles.
+- The Legacy Museum, 115 Coosa Street. Heritage boost: +20pts. Boost radius: 0.5 miles.
+
+---
+DOCUMENT: Scoring — Industrial Dimension
+PARCEL_ID: general
+TOPIC: scoring_industrial
+---
+Industrial score weight: 20% of final score.
+
+What it measures: Proximity to technology, military, and education anchors that drive workforce and economic activity. RISE treats these as "industrial" anchors because they represent the demand side of the workforce equation — where jobs are, or where infrastructure investment is concentrated.
+
+How it is calculated:
+- MGMix Internet Exchange: boost +20pts, radius 1.0 mile. Score = 20 + 70 × (1 - distance/1.0) if within 1 mile.
+- Maxwell AFB Gate: boost +15pts, radius 1.0 mile. Score = 15 + 70 × (1 - distance/1.0) if within 1 mile.
+- ASU Campus: boost +10pts, radius 0.75 mile. Score = 10 + 70 × (1 - distance/0.75) if within 0.75 miles.
+- Between 1× and 2× radius: partial score = 30 × (1 - (distance - radius)/radius).
+- Beyond 2× radius: score = 5.
+- Best score across all industrial anchors is used.
+
+What MGMix is: MGMix is the Montgomery Internet Exchange node — a facility where internet service providers and large content networks (AWS, Google, Meta) interconnect their networks. When a major technology company builds data infrastructure near an IX node, they create local demand for network operations, cybersecurity, and IT support jobs. RISE identifies parcels near MGMix as high-priority for technology workforce development.
+
+What Maxwell AFB is: Maxwell Air Force Base is a major federal military installation in Montgomery employing approximately 7,500 military and civilian personnel. It is also home to Air University, the US Air Force's professional military education centre. Veterans transitioning out of Maxwell AFB need civilian workforce skills. RISE identifies parcels near Maxwell as high-priority for veteran workforce development.
+
+---
+DOCUMENT: Scoring — Activity Dimension (ArcGIS Foot Traffic)
+PARCEL_ID: general
+TOPIC: scoring_activity
+---
+Activity score weight: 15% of final score.
+
+What it measures: Real foot traffic near the parcel, derived from the City of Montgomery's Most Visited Locations dataset served through ArcGIS. This replaces the earlier Bright Data / Google SERP approach. The ArcGIS data is the city's own measurement of which named locations are actually visited — a more credible and freely available signal.
+
+Data source: Montgomery ArcGIS FeatureServer — Most Visited Locations layer. Free, no API key required. Field used: F__of_Visits (total recorded visits per location).
+
+How it is calculated:
+1. Query all named locations within 1 mile (5,280 feet) of the parcel.
+2. For each location, compute Haversine distance from parcel to location.
+3. Assign a proximity weight based on distance:
+   - Less than 0.25 miles: weight 1.0 (direct draw)
+   - 0.25 to 0.50 miles: weight 0.7
+   - 0.50 to 0.75 miles: weight 0.4
+   - Greater than 0.75 miles: weight 0.2
+4. Compute weighted score: sum of (visits/max_visits × proximity_weight) divided by min(location_count, 10), multiplied by 100.
+5. Add a floor of 15 points if any locations were found.
+
+What a high activity score means: High foot traffic near the parcel confirms that people are already moving through this area. A community use here captures existing movement rather than betting on new demand.
+
+What a low activity score means: Low foot traffic can mean two things. For Parcels A and B, it means moderate neighbourhood activity. For Parcel C, it means the neighbourhood is underserved — there is nothing nearby worth visiting. A low activity score in a food desert context is evidence of the problem, not evidence of low demand.
+
+---
+DOCUMENT: Scoring — Proximity, Economic, Vacancy Dimensions
+PARCEL_ID: general
+TOPIC: scoring_proximity_economic_vacancy
+---
+Proximity score weight: 10% of final score.
+What it measures: Raw Haversine distance to the nearest anchor point of any type.
+Formula: 100 × (1 - min_distance / 2.0). A parcel 0 miles from an anchor scores 100. A parcel 2 miles away scores 0. Beyond 2 miles is outside RISE's consideration range for these hero parcels.
+
+Economic score weight: 10% of final score.
+What it measures: Whether the parcel's acreage is the right size for its zone type.
+Ideal ranges by zone:
+- Heritage zone: 0.25 to 3.0 acres. A cultural plaza or community centre needs space but not a massive footprint.
+- IX Hub / Industrial zone: 1.0 to 10.0 acres. A training facility or co-working campus needs room for classrooms, parking, and expansion.
+- Food desert zone: 0.5 to 5.0 acres. A community grocery and urban farm needs operational space and parking.
+If acreage falls in the ideal range: score = 100.
+If too small: score = max(10, (actual/ideal_min) × 80).
+If too large: score = max(30, (ideal_max/actual) × 90). Large parcels can be subdivided — they still score well.
+
+Vacancy score weight: 10% of final score.
+What it measures: How likely the parcel is to be vacant and ready for development.
+Data source: GIS improvement value field (ImpValue). $0 improvement value = almost certainly vacant land with no structures. This scores 90. Under $5,000 improvement value scores 70. Under $50,000 scores 40. Over $50,000 scores 20 — likely has existing structures that need demolition or renovation. All three hero parcels have ImpValue = $0 and score 90 on vacancy.
+
+---
+DOCUMENT: Scoring — Flood Risk and 311 Distress Dimensions
+PARCEL_ID: general
+TOPIC: scoring_flood_311
+---
+Flood risk score weight: 5% of final score. Scale: 0 to 5 (not 0 to 100).
+
+What it measures: Whether the parcel falls within a FEMA flood hazard zone. High flood risk makes development more expensive (flood-proofing requirements) and more dangerous (liability for city if flooding occurs after development).
+
+Data source: Montgomery OneView Flood Hazard Areas, served through Montgomery GIS ArcGIS FeatureServer. Free, no API key.
+
+Scoring:
+- Zone AE, A, AH, AO, VE, V, or FLOODWAY designation: 0 points. High flood risk — development strongly discouraged without major mitigation.
+- Zone X500, B, or C: 2 points. Moderate risk — 500-year floodplain.
+- Zone X or D: 5 points. Low risk — minimal flood hazard.
+- No zone found (parcel outside all mapped hazard areas): 5 points. Assumed Zone X.
+
+All three hero parcels score 5 out of 5 — all fall in Zone X (minimal flood risk).
+
+311 distress score weight: 5% of final score. Scale: 0 to 10.
+
+What it measures: Community distress signal from 311 service request call density. 311 is Montgomery's non-emergency service request line. Residents call 311 to report issues like overgrown grass on vacant lots, illegal dumping, abandoned vehicles, and infrastructure problems. High call density near a parcel signals that the community is actively identifying neglect — which also means the community wants the land fixed.
+
+Data source: Montgomery 311 Service Requests, served through Montgomery GIS ArcGIS MapServer. Free, no API key. Looks back 90 days. Queries within 0.5-mile radius of parcel.
+
+Scoring:
+- Density over 50 calls per square mile: 10 points. Critical distress.
+- Density 20–50: 7 points. High distress.
+- Density 10–20: 4 points. Moderate distress.
+- Density under 10: 2 points. Low distress.
+- Bonus: if more than 30% of calls are vacant-lot-related (Overgrown Grass, Illegal Dumping, Vacant Building, Debris), add 2 points. Maximum 10.
+
+Higher 311 score = higher community urgency = intervention is more needed. This dimension was added based on mentor feedback from Haley at Alabama State University, who recommended considering 311 call density as a community distress signal.
+
+---
+DOCUMENT: Scoring — Final Score and Urgency Flag
+PARCEL_ID: general
+TOPIC: scoring_final
+---
+Final score formula:
+Final = (Heritage × 0.25) + (Industrial × 0.20) + (Activity × 0.15) + (Proximity × 0.10) + (Economic × 0.10) + (Vacancy × 0.10) + (Flood × 0.05 × 20) + (311 × 0.05 × 10)
+
+Note: Flood and 311 scores are scaled to a 0–100 equivalent before weighting, so a flood score of 5/5 contributes 5 points (5 × 20 × 0.05 = 5) and a 311 score of 7/10 contributes 3.5 points.
+
+Urgency flag thresholds:
+- Final score 75 or above: HIGH urgency
+- Final score 55–74: MEDIUM urgency
+- Final score below 55: LOW urgency
+
+Hero parcel final scores (approximate, based on fallback data):
+- Parcel A (Heritage): 74 out of 100. Urgency: medium.
+- Parcel B (IX Hub): 29 out of 100. Urgency: low by score, medium by grant deadline.
+- Parcel C (Food Desert): 72 out of 100. Urgency: medium by score, HIGH by community need and grant deadline.
+
+Why the scores do not tell the whole story: Parcel B scores 29 but has a compelling workforce development narrative tied to Maxwell AFB and the IX node. Parcel C scores 72 but has the most acute community need and the shortest grant window. RISE uses scores to rank, but Gemini AI uses the full context — including health flags, grant deadlines, and foot traffic patterns — to generate recommendations that go beyond the number.
