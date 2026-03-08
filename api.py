@@ -355,7 +355,3 @@ def score_custom_parcel(body: CustomParcelRequest):
     }
 
     return _run_pipeline(parcel)
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("api:app", host="0.0.0.0", port=port)
