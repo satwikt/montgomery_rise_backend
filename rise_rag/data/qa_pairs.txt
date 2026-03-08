@@ -1,93 +1,73 @@
 DOCUMENT: RISE Chatbot — Pre-Planned Q&A Pairs
 PARCEL_ID: general
 TOPIC: qa_pairs
----
-This document contains the 20 most likely questions during a hackathon demo or judge session, with ideal answers. These are embedded as high-priority knowledge so the chatbot always answers planned questions accurately and fluently.
+
+This document contains the most likely questions during a hackathon demo or judge session, with ideal answers based on the correct parcel data. These are embedded as high-priority knowledge so the chatbot always answers planned questions accurately.
 
 ---
 Q: What is RISE?
-A: RISE stands for Revitalization Intelligence and Smart Empowerment. It is a decision-support tool built for the City of Montgomery, Alabama, that takes city-owned vacant parcels and recommends the highest-impact land reuse options using real data. RISE combines foot traffic data from Montgomery's own ArcGIS system, flood risk data from FEMA, community distress signals from 311 service requests, and active federal grant windows to score each parcel across 8 dimensions. Google Gemini 2.5 Pro then generates plain-English recommendations for each parcel. RISE was built for the WWVibes Hackathon at Alabama State University.
+A: RISE stands for Revitalization Intelligence and Smart Empowerment. It is a decision-support tool built for the City of Montgomery, Alabama, that takes city-owned vacant parcels and recommends the highest-impact land reuse options using real data. RISE combines live foot traffic data from Montgomery's ArcGIS system, flood risk data from FEMA, community distress signals from 311 service requests, and active federal grant windows to score each parcel across 8 dimensions. Google Gemini 2.5 Pro then generates plain-English recommendations. RISE was built for the WWVibes Hackathon at Alabama State University.
 
 ---
-Q: How many parcels does RISE analyse?
-A: For this demo, RISE focuses on three hero parcels — the highest-opportunity city-owned vacant parcels in Montgomery. In a full deployment, RISE's scoring engine can run on all 200-plus city-owned vacant parcels using the same 8-dimension model. The three hero parcels represent three different story types: Heritage (Parcel A on Commerce Street), Smart Infrastructure (Parcel B on Kimball Street), and Economic Urgency (Parcel C on Coosa Street).
-
----
-Q: Why did you choose these three parcels?
-A: The three parcels were selected by running parcel_finder.py, which queried all city-owned parcels from Montgomery GIS, computed their proximity to five anchor points (Rosa Parks Museum, The Legacy Museum, MGMix IX node, Maxwell AFB, and Alabama State University), and ranked them by opportunity score. The three selected parcels represent distinct zone types — heritage corridor, technology and military workforce zone, and food desert — so the demo illustrates the full range of RISE's recommendation capability. Each parcel tells a different story about what Montgomery's vacant land can become.
+Q: What are the three hero parcels and where are they?
+A: The three hero parcels are: Parcel A on Bibb Street, Montgomery AL 36104 (8.34 acres, Heritage story — 0.167 miles from Rosa Parks Museum); Parcel B on Upper Wetumpka Road, Montgomery AL 36130 (2.43 acres, Digital Infrastructure / IX Hub — 0.214 miles from MGMix internet exchange node); and Parcel C at 1600 Terminal Road, Montgomery AL 36108 (6.20 acres, Community Resilience and Food Access — in the USDA-confirmed food desert neighbourhood of Maxwell Heights / Gibbs Village).
 
 ---
 Q: What is the heritage boost and why does it matter?
-A: The heritage boost is a scoring mechanism that adds extra weight to recommendations for parcels near Montgomery's civil rights landmarks — specifically the Rosa Parks Museum and The Legacy Museum. If a parcel is within 0.5 miles of the Rosa Parks Museum, RISE automatically adds 25 points to the heritage dimension score. The Legacy Museum adds 20 points. This is not a bonus on top of the score — it is built into the heritage scoring formula. The result is that cultural, community, and public space uses rank higher than purely economic uses when a parcel is near a civil rights landmark. This is intentional: RISE was designed to reflect Montgomery's values, not just market logic.
+A: The heritage boost is a scoring mechanism that adds extra weight to recommendations for parcels near Montgomery's civil rights landmarks — specifically the Rosa Parks Museum (+25pt boost, 0.5-mile radius) and The Legacy Museum (+20pt boost, 0.5-mile radius). If a parcel is within 0.5 miles of these landmarks, the boost fires automatically. The result is that cultural, community, and public space uses rank higher than purely economic uses near civil rights landmarks. This is intentional — RISE was designed to reflect Montgomery's values, not just market logic.
 
 ---
-Q: Why does Parcel A score so high on heritage?
-A: Parcel A on Commerce Street is 0.154 miles from the Rosa Parks Museum — well within the 0.5-mile heritage boost radius. The full +25pt boost fires, and the proximity multiplier (1 - 0.154/0.5) adds additional points. The result is a heritage score of approximately 78 out of 100, which contributes 19.5 points to the final score (78 × 0.25). The Legacy Museum is also approximately 0.22 miles away, potentially adding the +20pt Legacy Museum boost. Heritage score is the single largest driver of Parcel A's final score of 74.
+Q: Why does Parcel A score high on heritage?
+A: Parcel A on Bibb Street is 0.167 miles from the Rosa Parks Museum — well within the 0.5-mile heritage boost radius. The full +25pt Rosa Parks Museum boost fires. The Legacy Museum is also approximately 0.18 miles away, adding potential additional heritage boost. Heritage score is approximately 78 out of 100, contributing approximately 19.5 points to the final score of 74.
 
 ---
-Q: Why does Parcel B score lower than the other two parcels?
-A: Parcel B on Kimball Street scores 29 out of 100 on the final RISE score, the lowest of the three. The primary reasons are: (1) its acreage is only 0.33 acres, smaller than the 1–10 acre ideal range for workforce and technology uses, which causes the economic score to be low; (2) it is 0.891 miles from Maxwell AFB Gate — within the 1.0-mile radius but near the outer edge, which reduces the industrial score to approximately 22; (3) heritage score is only 5 because it is approximately 1.9 miles from the nearest civil rights landmark, well outside any boost radius. However, the low final score does not fully capture Parcel B's strategic opportunity — the Maxwell AFB workforce pipeline and IX node proximity are narrative strengths that the score alone does not convey.
+Q: What makes Parcel B special?
+A: Parcel B on Upper Wetumpka Road is only 0.214 miles from MGMix — the Montgomery Internet Exchange node — making it the closest hero parcel to the IX node. MGMix is a critical piece of digital infrastructure that has attracted Meta's $1.5 billion data centre (1.3 million sq ft, 2 miles east). A technology workforce training hub at Parcel B would pipeline locally trained workers into network operations, cybersecurity, and IT roles created by Meta and the broader data infrastructure build-out. Parcel B also sits 0.25 miles from The Legacy Museum and 0.33 miles from the Rosa Parks Museum — both within the 0.5-mile heritage boost radius — giving it dual anchor proximity. At 2.43 acres it has enough space for a real training facility.
+
+---
+Q: What is Parcel B's story — why is it the IX Hub parcel?
+A: Parcel B's story is the technology workforce gap. MGMix at 0.214 miles provides direct fibre proximity. Meta's $1.5 billion data centre 2 miles east creates local demand for network operations, cybersecurity, and IT staff — jobs paying $45,000–$85,000 that require 6–18 months of training, not a four-year degree. Maxwell AFB at 2.1 miles brings 14,500 personnel, many transitioning out of service and seeking tech career pathways. Alabama State University at 1.5 miles is a natural educational partner. A training hub at Parcel B directly closes the gap between federal employment anchors and the local skill base. The SBA SBIR DoD Phase I grant is also open with 52 days remaining — covering 100% of costs for defence-adjacent businesses with no match required.
+
+---
+Q: What is Parcel C's story and what is the urgency?
+A: Parcel C at 1600 Terminal Road in the 36108 ZIP code (Maxwell Heights / Gibbs Village) is in a USDA-confirmed food desert. 32% of residents experience food insecurity, the poverty rate is 35%, and the nearest full grocery (Piggly Wiggly / Food Outlet on West Fairview Avenue) is 1.4 miles away — effectively inaccessible on Montgomery's 60-minute bus schedule. The USDA REDLG Q4 grant covers 75% of costs for a community grocery co-op here, meaning the city's out-of-pocket on a $500,000 project is only $125,000. The Opportunity Zone designation means private investors can fund the match. USDA VAPG is also open at 39 days remaining. At 6.20 acres, the parcel can accommodate the grocery, a health clinic, and an urban farm simultaneously.
+
+---
+Q: Which grant is most urgent right now?
+A: The most urgent grant for Parcel C is the USDA Value Added Producer Grant (VAPG) at 39 days remaining (closes approximately April 16, 2026) — best suited for the urban farm and community market. The SBA SBIR DoD Phase I is also urgent at 52 days remaining (closes approximately April 29, 2026) — relevant for Parcel B defence-adjacent businesses. The USDA REDLG Q4, with 115 days remaining (closes approximately July 1, 2026), is the highest-coverage grant across all three parcels but has the most preparation time.
+
+---
+Q: How much would the city pay for a grocery on Parcel C?
+A: At 75% USDA REDLG Q4 coverage, on a $500,000 project the city contributes $125,000. On a $1,000,000 project the city contributes $250,000. If an Opportunity Zone fund provides the match, the city's direct cash contribution from general funds approaches zero. Parcel C's 36108 census tract is a federally designated Opportunity Zone — private investors receive capital gains tax benefits for investing here, making external equity financing viable.
 
 ---
 Q: Where does the foot traffic data come from?
-A: The foot traffic data comes from Montgomery's own ArcGIS dataset called Most Visited Locations. This is the city's tracked data on which named locations across Montgomery are actually visited, with recorded visit counts per location. RISE queries this dataset using a 1-mile radius spatial query around each parcel. The data is free, requires no API key, and is the city's own measurement — which makes it more credible than scraped Google Maps data. For Parcel A, the top nearby locations are the Rosa Parks Museum at 8,420 visits, the Dexter Avenue King Memorial at 6,250 visits, and the Civil Rights Memorial Center at 5,100 visits.
-
----
-Q: What does the activity score measure for Parcel C? It seems low.
-A: Parcel C has an activity score of 29 out of 100, which is the lowest of the three parcels. But in the food desert context, a low activity score tells a different story than low demand. The ArcGIS data shows no high-traffic grocery or retail destination within 1 mile of Parcel C. The nearest food-related destination is the Montgomery Area Food Bank at 3,100 visits — which confirms that residents are seeking food resources, not that they do not need them. A low activity score in a food desert means the neighbourhood is underserved, not that it is low-demand. If a community grocery opens on Parcel C, it would immediately become the highest-visit destination in this zone.
-
----
-Q: What is the most urgent grant right now?
-A: The most urgent grant in the RISE portfolio is the USDA Rural Economic Development Q3 grant, which closes on March 31, 2026 — 26 days from today. It covers up to 75% of project costs for the Parcel C zone (median income $22,400 qualifies for the top coverage tier) and up to 70% for Parcels A and B. The city's out-of-pocket on a $500,000 community grocery project at 75% coverage is $125,000. This is the most capital-efficient federal funding opportunity available to Montgomery for community development on vacant land right now. The city planning office needs to begin application preparation immediately.
-
----
-Q: How much would the city actually have to pay for a grocery store on Parcel C?
-A: At 75% USDA Rural Economic Development coverage, on a $500,000 project the city contributes $125,000. On a $1,000,000 project the city contributes $250,000. If the Opportunity Zone tax incentive attracts private equity for part of the match, the city's direct cash contribution could be even lower. Parcel C's census tract is a federally designated Opportunity Zone, which allows private investors to reduce capital gains tax liability by investing here. A community grocery co-op structured with Opportunity Zone equity financing could be built with as little as $75,000–$100,000 in direct city general fund expenditure on a $500,000 project.
-
----
-Q: What is the USDA food desert designation?
-A: The USDA Economic Research Service formally designates an area as a food desert when it meets two criteria: it is a low-income census tract (poverty rate above 20%), and a substantial number of residents have low access to a supermarket — in urban areas, that means more than 500 residents or 33% of the tract's population live more than 1 mile from a supermarket. The Parcel C zone meets both criteria. 41% of residents experience food insecurity. The nearest grocery store is 2.8 miles away. Approximately 6,200 residents are affected. The USDA designation means this location qualifies for the highest federal funding coverage tiers.
-
----
-Q: What is the 311 distress score?
-A: The 311 distress score measures community complaint density near a parcel based on 311 service requests filed in the last 90 days. 311 is Montgomery's non-emergency service line — residents call it to report overgrown grass, illegal dumping, abandoned vehicles, and other neighbourhood issues. High call density near a parcel signals that the community is actively flagging neglect on that land. RISE scores this 0–10, with higher scores indicating higher urgency for intervention. If more than 30% of calls are specifically about vacant-lot conditions (overgrown grass, illegal dumping, vacant buildings), a +2 bonus fires. Parcel C scores 7 out of 10 on this dimension because the 311 call pattern directly reflects complaints about vacant land in the immediate area.
-
----
-Q: What is the flood risk score?
-A: The flood risk score tells you whether a parcel falls within a FEMA flood hazard zone. It is scored 0–5, where 5 is the best (lowest flood risk). RISE queries Montgomery's OneView Flood Hazard Areas layer — which serves FEMA's National Flood Hazard Layer data — for each parcel's coordinates. Zone AE or Zone A parcels score 0 (high risk, development is expensive and risky). Zone X parcels score 5 (minimal risk, no flood-specific building requirements). All three hero parcels score 5 out of 5 — they all fall in FEMA Zone X.
-
----
-Q: How does RISE use Gemini AI?
-A: After RISE computes all 8 dimension scores for a parcel, it sends a structured prompt to Google Gemini 2.5 Pro. The prompt contains every score with its explanation, the ArcGIS foot traffic data, the open grant windows, and the community health flags. Gemini's job is to generate three plain-English recommendations that explain the data — it does not recalculate anything. RISE uses Gemini's JSON mode (responseMimeType=application/json) to ensure clean, parseable output. The total Gemini API cost for analysing all three parcels is approximately $0.004 — well within the free tier of 500 requests per day. If no Gemini key is set, RISE falls back to pre-written mock recommendations based on the zone context.
-
----
-Q: What happens if the APIs are down during the demo?
-A: Every live API call in RISE has a pre-written silent fallback. If ArcGIS Most Visited Locations is unreachable, RISE uses pre-researched visit counts per zone type. If the flood hazard API fails, RISE returns Zone X and 3 out of 5 (safe middle value). If 311 is unavailable, RISE returns a moderate distress fallback. If Gemini is unreachable, RISE uses the mock recommendation function. The demo will never show a blank panel or crash. The chatbot notes when fallback data is in use.
-
----
-Q: Can RISE scale to all of Montgomery's 200-plus vacant parcels?
-A: Yes. The scoring engine in rise_selector_v3.py is designed to run on any number of parcels with the same 8-dimension model. The ArcGIS, Flood Hazard, and 311 data sources are all free and do not have documented rate limits for the query volumes involved. Gemini at the free tier supports 500 requests per day — scoring 200 parcels requires 200 Gemini calls, which fits within the free tier in a single day. The main limit is the Gemini free tier for large-scale deployment, which would require the paid tier at approximately $0.004 per parcel.
-
----
-Q: Why did you remove the Bright Data / Google SERP integration?
-A: An earlier version of RISE used Bright Data's SERP API to scrape Google Maps popular times data for neighbourhood activity signals. This was replaced with Montgomery's own ArcGIS Most Visited Locations dataset for three reasons: the ArcGIS data is the city's own tracked measurement, not a scrape from a third party; it is free with no API key; and it is more defensible to present to judges, city planners, and grant reviewers. A city government presenting its own data is more credible than presenting scraped Google Maps data.
-
----
-Q: What are the anchor points RISE uses?
-A: RISE uses five anchor points that represent the key economic and cultural drivers of Montgomery's development opportunity zones: Rosa Parks Museum (civil rights heritage, 0.5-mile boost radius, +25pt boost), The Legacy Museum (civil rights heritage, 0.5-mile radius, +20pt boost), MGMix Internet Exchange node (digital infrastructure, 1.0-mile radius, +20pt boost), Maxwell AFB Gate (federal military anchor, 1.0-mile radius, +15pt boost), and Alabama State University campus (education anchor, 0.75-mile radius, +10pt boost). Each anchor has its own boost type and radius. Heritage anchors drive the heritage score; MGMix, Maxwell, and ASU drive the industrial score.
+A: Foot traffic data comes from Montgomery's own ArcGIS dataset called Most Visited Locations. This is the city's tracked data on which named locations across Montgomery are actually visited, with recorded visit counts per location. RISE queries this dataset using a 1-mile radius spatial query around each parcel. The data is free, requires no API key, and is the city's own measurement — more credible than scraped third-party data for grant applications and city planning presentations.
 
 ---
 Q: What is MGMix and why does it matter?
-A: MGMix is the Montgomery Metropolitan Internet Exchange — a facility where internet service providers and large technology companies like AWS, Google, and Meta interconnect their networks locally. Having an IX node means data does not have to route through Atlanta or Birmingham. This has attracted data infrastructure investment to the Montgomery region and created local demand for technology workers in network operations, cybersecurity, and IT support. These jobs pay $45,000–$85,000 annually and require 6–18 months of technical training rather than a four-year degree. Parcels near MGMix are RISE's top candidates for workforce training facilities that can pipeline locally trained workers into these roles.
+A: MGMix is the Montgomery Metropolitan Internet Exchange — a facility where internet service providers and large technology companies connect their networks locally. Having an IX node means data does not route through Atlanta or Birmingham. This has attracted Meta's $1.5 billion data centre to the Montgomery metro and created local demand for technology workers. Parcel B at 0.214 miles from MGMix is ideally positioned for a workforce training hub serving this demand.
 
 ---
-Q: What does RISE recommend for each parcel?
-A: Parcel A (Commerce Street — Heritage): Top recommendation is a Civil Rights Heritage Plaza, connecting visitors to the heritage corridor between Rosa Parks Museum and Dexter Avenue. The heritage boost fires at full strength at 0.154 miles from the Rosa Parks Museum. Parcel B (Kimball Street — IX Hub): Top recommendation is an AI Workforce Training Hub, leveraging Maxwell AFB's veteran workforce pipeline and the IX node's technology job demand. Parcel C (Coosa Street — Food Desert): Top recommendation is a Community Grocery Co-op, serving 6,200 residents with no grocery within 2.8 miles. The USDA Rural Economic Development Q3 grant covers 75% of costs and closes in 26 days.
+Q: What is the 311 distress score?
+A: The 311 distress score measures community complaint density near a parcel based on service requests filed in the last 90 days. 311 is Montgomery's non-emergency service line — residents call it to report overgrown grass, illegal dumping, abandoned vehicles, and other neighbourhood issues. RISE scores this 0–10, with higher scores indicating higher urgency for intervention. If more than 30% of calls are about vacant-lot conditions specifically, a +2 bonus fires. Parcel C scores 7 out of 10 because the 311 call pattern directly reflects complaints about the neglected vacant land at 1600 Terminal Road.
 
 ---
-Q: Is the data in RISE real or made up?
-A: All data in RISE is real. Foot traffic figures come from Montgomery's live ArcGIS Most Visited Locations endpoint. Flood risk comes from FEMA's National Flood Hazard Layer served through Montgomery GIS. 311 distress data comes from Montgomery's actual 311 service request records. Grant deadlines and coverage percentages come from Grants.gov and USDA programme documentation. Parcel coordinates, acreage, and ownership come from Montgomery GIS. Health statistics (food insecurity, asthma rates, median income) come from USDA ERS, CDC PLACES, and US Census Bureau data for the specific census tracts. Every number is traceable to a public source.
+Q: What is the flood risk score?
+A: The flood risk score indicates whether a parcel falls within a FEMA flood hazard zone, scored 0–5 where 5 is lowest risk. RISE queries Montgomery's OneView Flood Hazard Areas layer for FEMA National Flood Hazard Layer data. Zone X scores 5 (minimal risk), Zone AE scores 0 (high risk, expensive to develop). All three hero parcels score 5 out of 5 — they all fall in FEMA Zone X.
 
 ---
-Q: What track is this built for?
-A: RISE was built for the Workforce and Economic Growth track at the WWVibes Hackathon at Alabama State University. It also has cross-coverage with the Smart Cities track (ArcGIS integration, data-driven planning) and the Civic Access track (community health equity, food desert intervention, heritage preservation). The scoring model was designed to reflect Montgomery's specific economic development priorities: civil rights heritage, technology workforce development, and food access equity.
+Q: How does RISE use Gemini AI?
+A: After computing all 8 dimension scores, RISE sends a structured prompt to Google Gemini 2.5 Pro containing every score with its explanation, ArcGIS foot traffic data, open grant windows, and community health flags. Gemini generates three plain-English land reuse recommendations explaining the data — it does not recalculate scores. RISE uses Gemini's JSON mode for clean, parseable output. Total API cost for all three parcels is approximately $0.004. If no Gemini key is configured, RISE falls back to pre-written zone-context recommendations.
+
+---
+Q: Is the data in RISE real?
+A: Yes. Foot traffic comes from Montgomery's live ArcGIS Most Visited Locations endpoint. Flood risk comes from FEMA's National Flood Hazard Layer via Montgomery GIS. 311 distress data comes from Montgomery's actual 311 records. Grant deadlines and coverage percentages come from Grants.gov and USDA programme documentation. Parcel coordinates, acreage, and ownership come from Montgomery GIS, reverse-geocoded and confirmed on March 7, 2026 using reverse_geocode_check.py. Health statistics come from USDA ERS, PIH 2024, and ACS 2023 5-Year data for the specific census tracts. Every number is traceable to a public source.
+
+---
+Q: What track is RISE built for?
+A: RISE was built for the Workforce and Economic Growth track at the WWVibes Hackathon at Alabama State University. It also has cross-coverage with the Smart Cities track (ArcGIS integration, data-driven planning) and the Civic Access track (community health equity, food desert intervention, heritage preservation). The scoring model reflects Montgomery's specific economic development priorities: civil rights heritage, technology workforce development, and food access equity.
+
+---
+Q: Can RISE scale to all of Montgomery's 200+ vacant parcels?
+A: Yes. The scoring engine in rise_selector_v3.py runs on any number of parcels with the same 8-dimension model. ArcGIS, Flood Hazard, and 311 sources are all free with no documented rate limits at the relevant query volumes. Gemini at the free tier supports 500 requests per day — scoring 200 parcels requires 200 Gemini calls, fitting within the free tier in a single run.

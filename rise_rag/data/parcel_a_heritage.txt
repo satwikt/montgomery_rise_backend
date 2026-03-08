@@ -1,89 +1,90 @@
-DOCUMENT: Parcel A — Heritage Story
+DOCUMENT: Parcel A — Heritage Story Overview
 PARCEL_ID: A
 TOPIC: parcel_overview
----
-Parcel A is a city-owned vacant parcel located on Commerce Street, Montgomery, Alabama, ZIP code 36104. The parcel ID is 11 01 12 4 004 001.000. It is owned by the City of Montgomery. The parcel is 8.34 acres in size. Its coordinates are 32.3789 latitude, -86.3109 longitude. The improvement value is $0, which confirms it is vacant and undeveloped. The zone context for this parcel is Heritage. RISE classifies this as the Heritage Story parcel.
+
+Parcel A is a city-owned vacant parcel located on Bibb Street, Montgomery, Alabama, ZIP code 36104. The GIS parcel ID is 11 01 12 4 004 001.000. It is owned by the City of Montgomery. The parcel is 8.34 acres in size. Its coordinates are 32.37894 latitude, -86.31094 longitude. The improvement value is $0, confirming it is vacant and undeveloped. The zone context is Heritage. RISE classifies this as the Heritage Story parcel. It sits in the heart of Montgomery's civil rights heritage corridor, between the Rosa Parks Museum and The Legacy Museum.
 
 ---
 DOCUMENT: Parcel A — Anchor Proximity
 PARCEL_ID: A
 TOPIC: anchor_proximity
----
-Parcel A is 0.154 miles from the Rosa Parks Museum, which is its nearest anchor point. The Rosa Parks Museum is a nationally recognised civil rights landmark located at 252 Montgomery Street. The Legacy Museum is also nearby at approximately 0.22 miles from this parcel. The MGMix Internet Exchange node is approximately 0.15 miles away. Alabama State University campus is approximately 1.4 miles away. Maxwell AFB Gate is approximately 2.1 miles away. The parcel sits at the heart of Montgomery's civil rights heritage corridor, between the Rosa Parks Museum and the Dexter Avenue King Memorial Baptist Church.
+
+Parcel A's nearest anchor is the Rosa Parks Museum at 0.167 miles away. The Rosa Parks Museum is a nationally recognised civil rights landmark at 252 Montgomery Street, operated by Troy University. The Legacy Museum, operated by the Equal Justice Initiative, is approximately 0.18 miles from this parcel. MGMix — the Montgomery Internet Exchange node — is approximately 0.15 miles away, within the 1.0-mile industrial boost radius. Alabama State University campus is approximately 1.6 miles away. Maxwell AFB Gate is approximately 2.3 miles away. The parcel sits at the intersection of Montgomery's civil rights heritage corridor and its digital infrastructure corridor, giving it dual anchor proximity that is unique among all three hero parcels.
 
 ---
-DOCUMENT: Parcel A — Heritage Boost
+DOCUMENT: Parcel A — Heritage Boost Explanation
 PARCEL_ID: A
 TOPIC: heritage_boost
----
-Parcel A receives a full heritage boost because it is 0.154 miles from the Rosa Parks Museum, which is well within the 0.5-mile boost radius. The Rosa Parks Museum boost adds +25 points to heritage-facing recommendation scores. The boost is calculated as: boost_pts + 75 × (1 - distance/radius), giving a heritage score of approximately 78 out of 100. The Legacy Museum within 0.5 miles adds an additional potential +20 point boost. The heritage boost is RISE's most unique feature — it automatically elevates cultural and community-facing land uses above purely economic ones when a parcel is near a civil rights landmark. Without the boost, a workforce use might rank higher on raw economic score alone. The boost visibly changes the recommendation ranking: Civil Rights Heritage Plaza ranks first because of the boost. The boost percentage, landmark name, and distance are all displayed on the recommendation card.
+
+Parcel A receives a full heritage boost because it is 0.167 miles from the Rosa Parks Museum — well within the 0.5-mile boost radius. The Rosa Parks Museum boost adds +25 points to the heritage dimension score. The Legacy Museum at approximately 0.18 miles also falls within the 0.5-mile radius, adding a further potential +20 point boost. The heritage boost is RISE's most distinctive feature — it automatically elevates cultural and community-facing land uses above purely economic uses when a parcel is near a civil rights landmark. This reflects Montgomery's values: heritage and community take precedence over raw market logic.
 
 ---
 DOCUMENT: Parcel A — RISE Scores
 PARCEL_ID: A
 TOPIC: scores
----
+
 Parcel A RISE scoring breakdown across all 8 dimensions:
 
-Heritage score: 78 out of 100. This is high because the parcel is 0.154 miles from the Rosa Parks Museum, within the 0.5-mile boost radius. The +25pt heritage boost fires automatically.
+Heritage score: approximately 78 out of 100. High because the parcel is 0.167 miles from the Rosa Parks Museum, within the 0.5-mile boost radius. The full +25pt heritage boost fires. The Legacy Museum at 0.18 miles adds potential additional boost.
 
-Industrial score: 81 out of 100. This is high because the MGMix Internet Exchange node is approximately 0.15 miles away, within the 1.0-mile digital infrastructure boost radius. The industrial boost from MGMix is +20 points.
+Industrial score: approximately 80 out of 100. MGMix IX Node is approximately 0.15 miles away, well within the 1.0-mile digital infrastructure boost radius. The +20pt MGMix industrial boost fires at near full strength.
 
-Activity score: 73 out of 100. This comes from the ArcGIS Most Visited Locations data. The Rosa Parks Museum has 8,420 recorded visits, the Dexter Avenue King Memorial has 6,250 visits, and the Civil Rights Memorial Center has 5,100 visits — all within 1 mile of this parcel. High weekend foot traffic confirms active heritage tourism.
+Activity score: approximately 70 out of 100. ArcGIS Most Visited Locations data shows the Rosa Parks Museum with approximately 8,420 recorded visits, Dexter Avenue King Memorial Baptist Church with approximately 6,250 visits, and the Civil Rights Memorial Center with approximately 5,100 visits — all within 1 mile.
 
-Proximity score: 92 out of 100. Calculated as 100 × (1 - 0.154/2.0). The parcel is very close to its nearest anchor.
+Proximity score: approximately 92 out of 100. Calculated as 100 x (1 - 0.167/2.0). Very close to its nearest anchor.
 
-Economic score: 32 out of 100. The parcel is 8.34 acres, which is larger than the 0.25–3.0 acre ideal range for heritage zone uses. The parcel can be subdivided for smaller cultural development.
+Economic score: approximately 35 out of 100. The parcel is 8.34 acres, larger than the ideal range for heritage zone uses. Can be subdivided.
 
-Vacancy score: 70 out of 100. The improvement value is $0, indicating a vacant or undeveloped parcel. A $0 improvement value typically scores 90, but the large acreage introduces some uncertainty.
+Vacancy score: approximately 90 out of 100. Improvement value is $0.
 
-Flood risk score: 5 out of 5. This parcel falls in FEMA Zone X, which is minimal flood risk. No flood hazard area intersects this location.
+Flood risk score: 5 out of 5. FEMA Zone X — minimal flood risk.
 
-311 distress score: 4 out of 10. Moderate distress density — approximately 12 calls per square mile in the last 90 days. Complaint types include overgrown vegetation and minor infrastructure issues.
+311 distress score: approximately 4 out of 10. Moderate distress. Complaint types include overgrown vegetation and minor infrastructure issues.
 
-Final RISE score: 74 out of 100. Weighted combination of all 8 dimensions.
+Final RISE score: approximately 74 out of 100.
 Score weights: Heritage 25%, Industrial 20%, Activity 15%, Proximity 10%, Economic 10%, Vacancy 10%, Flood 5%, 311 5%.
-Urgency flag: medium.
+Urgency flag: medium by score, HIGH by grant deadline.
 
 ---
 DOCUMENT: Parcel A — AI Recommendations
 PARCEL_ID: A
 TOPIC: recommendations
+
+RISE top 3 land reuse recommendations for Parcel A:
+
+Recommendation 1: Civil Rights Heritage Plaza. This parcel is 0.167 miles from the Rosa Parks Museum and 0.18 miles from The Legacy Museum — directly on Montgomery's civil rights heritage corridor. ArcGIS foot traffic confirms sustained visitor movement: 8,420 visits at the Rosa Parks Museum, 6,250 at Dexter Avenue King Memorial. Heritage boost fires at full strength. A heritage plaza creates public gathering space connecting landmarks, serves both residents and tourists, and activates underutilised city-owned land. Cost tier: Mid-Term $500K–$5M. Grant: USDA VAPG, open, 39 days remaining, covers 50% of costs with 1:1 match.
+
+Recommendation 2: Community Cultural Centre and Vendor Market. A cultural centre filling the gap between the Rosa Parks Museum and Dexter Avenue. ArcGIS shows weekend activity peaks — heritage tourism is highest Saturday and Sunday. A vendor market creates economic opportunity for local artisans and food entrepreneurs. Cost tier: Mid-Term $500K–$5M. Grant: USDA REDLG Q4, open, 115 days remaining, covers 70% of costs with 20% match.
+
+Recommendation 3: Digital Innovation Hub with Heritage Overlay. MGMix IX Node at 0.15 miles provides direct fibre proximity. A tech co-working space with civil rights heritage interpretation could serve both the workforce development and heritage missions simultaneously. Cost tier: Mid-Term $500K–$5M. Grant: USDA REDLG Q4 eligible.
+
+One-line summary: Heritage-priority parcel — 0.167 miles from Rosa Parks Museum, dual anchor proximity to MGMix. Cultural and community reuse scores highest.
+
 ---
-RISE recommends the following top 3 land reuse options for Parcel A:
-
-Recommendation 1: Civil Rights Heritage Plaza. Fit score: 78 out of 100. Cost tier: Mid-Term $500K–$5M. This parcel is primed for a heritage plaza on Montgomery's civil rights corridor. Positioned 0.15 miles from the Rosa Parks Museum, it sits at the intersection of the city's historic landmarks. The ArcGIS foot traffic data confirms sustained visitor movement in this zone — 8,420 visits at the Rosa Parks Museum, 6,250 at the Dexter Avenue King Memorial. The heritage boost fires automatically because the parcel is within the 0.5-mile radius, elevating cultural uses above purely economic ones. Grant: USDA Value Added Producer Grant, open, 41 days remaining, covers 50% of costs with a 1:1 match.
-
-Recommendation 2: Community Cultural Centre and Vendor Market. Fit score: 70 out of 100. Cost tier: Mid-Term $500K–$5M. A cultural centre serving both residents and heritage tourists fills the gap between Rosa Parks Museum and Dexter Avenue. ArcGIS data shows this zone is active on weekends, with heritage tourism peaking Saturday and Sunday. A vendor market component creates economic opportunity for local artisans and food entrepreneurs. Grant: USDA Rural Economic Development Q3, open, 26 days remaining, covers 70% of costs with a 20% match.
-
-Recommendation 3: Pocket Park and Public Art Installation. Fit score: 55 out of 100. Cost tier: Quick Win under $500K. A lower-cost immediate intervention that activates the parcel while longer-term planning proceeds. Creates public space connecting the heritage trail between landmarks. No grant currently open for this use, but city capital improvement funds are eligible.
-
-One-line summary: Heritage-priority parcel — 0.15 miles from Rosa Parks Museum. Cultural reuse scores highest.
-
----
-DOCUMENT: Parcel A — Grants
+DOCUMENT: Parcel A — Grants Detail
 PARCEL_ID: A
 TOPIC: grants
----
-Parcel A has two open grant windows as of March 2026:
 
-Grant 1: USDA Value Added Producer Grant. Status: OPEN. Deadline: April 15, 2026 — 41 days remaining. Eligibility: covers up to 50% of total project costs. Match requirement: 1:1 (applicant must match every dollar). Example: on a $500,000 project, USDA covers $250,000 and the city contributes $250,000. This grant supports value-added community uses and food-related development.
+Parcel A has two open grant windows as of March 8, 2026:
 
-Grant 2: USDA Rural Economic Development Q3. Status: OPEN. Deadline: March 31, 2026 — 26 days remaining. Eligibility: covers up to 70% of total project costs for communities with low median household income. Match requirement: 20% (applicant covers 20% of costs). Example: on a $500,000 project, USDA covers $350,000 and the city contributes $150,000. West Montgomery median income of $22,400 qualifies this area for the 70–75% coverage tier.
+Grant 1: USDA Value Added Producer Grant (VAPG). Status: OPEN. Deadline: approximately April 16, 2026 — 39 days remaining. Eligibility: up to 50% of total project costs. Match: 1:1. On a $500,000 project: USDA covers $250,000, city contributes $250,000. Best suited to community uses with a food, cultural, or market component.
 
-The USDA Rural Economic Development Q3 deadline is the most urgent — only 26 days away as of March 2026. The city has approximately two weeks to prepare a competitive application before the scramble begins.
+Grant 2: USDA Rural Economic Development Loan and Grant (REDLG) Q4. Status: OPEN. Deadline: approximately July 1, 2026 — 115 days remaining. Eligibility: up to 70% of costs. Match: 20%. On a $500,000 project: USDA covers $350,000, city contributes $150,000.
+
+The USDA VAPG at 39 days is more urgent. REDLG Q4 at 115 days provides more preparation time but higher coverage.
 
 ---
 DOCUMENT: Parcel A — Health and Community Context
 PARCEL_ID: A
 TOPIC: health_context
----
-The community surrounding Parcel A has the following health and equity indicators:
 
-Food insecurity: 28% of residents in this census tract experience food insecurity. This is above the Montgomery city average.
+Community health and equity indicators for Parcel A (36104 ZIP, ACS 2023 and PIH 2024):
 
-Asthma rate: The asthma rate in this area is 1.6 times the city average. Environmental factors related to vacant land maintenance — overgrown vegetation, debris accumulation — contribute to respiratory health impacts.
+Poverty rate: 40.9% — nearly double the Montgomery citywide rate.
+Uninsured rate: 11.4%.
+Public health coverage (Medicaid/Medicare): 46.5%.
+Median household income: $31,231.
+Obesity rate: 39.8% (PIH 2024 citywide).
+Nearest primary care clinic: approximately 0.6 miles.
 
-Nearest clinic: The nearest primary care clinic is approximately 1.2 miles from this parcel.
-
-This parcel is located in the 36104 ZIP code, which covers downtown Montgomery and the civil rights heritage corridor. The neighbourhood is a mix of institutional buildings, historic sites, and underutilised city-owned land. Activating this parcel with a community use would directly serve residents who currently lack nearby health and cultural services.
+The 36104 ZIP covers downtown Montgomery and the civil rights heritage corridor — a mix of institutional buildings, historic sites, and underutilised city-owned land. Activating this parcel directly serves residents who lack nearby community gathering spaces. The heritage corridor location also benefits approximately 20,000 annual heritage tourists visiting the Rosa Parks Museum and Legacy Museum.

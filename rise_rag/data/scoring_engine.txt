@@ -1,7 +1,7 @@
 DOCUMENT: RISE Scoring Engine — Full Explanation
 PARCEL_ID: general
 TOPIC: scoring_engine
----
+
 RISE scores every city-owned vacant parcel across 8 dimensions. Each dimension is scored 0–100 (except flood risk, which is 0–5), weighted, and summed to produce a final score out of 100. The weights reflect the priority order established by the RISE team based on Montgomery's specific economic development goals.
 
 WHAT RISE IS:
@@ -11,7 +11,7 @@ RISE stands for Revitalization Intelligence and Smart Empowerment. It is a decis
 DOCUMENT: Scoring — Heritage Dimension
 PARCEL_ID: general
 TOPIC: scoring_heritage
----
+
 Heritage score weight: 25% of final score. This is the highest-weighted dimension.
 
 What it measures: Proximity to civil rights landmarks — specifically the Rosa Parks Museum and The Legacy Museum. Montgomery is a nationally significant civil rights heritage city. RISE prioritises parcels near these landmarks for cultural and community uses because the heritage tourism economy is real, measurable, and growing.
@@ -23,20 +23,25 @@ How it is calculated:
 - If a parcel is beyond 1.0 miles from all heritage landmarks: score = 5. Minimum floor.
 - The best score across all heritage anchors is used.
 
-Heritage boost explained: The heritage boost is RISE's most distinctive feature. It is not a bonus on top of the score — it is built into the formula. A parcel 0.1 miles from the Rosa Parks Museum scores approximately 95 on heritage, which contributes 23.75 points to the final score (95 × 0.25). Without the boost, a parcel at the same location might score 70 on heritage, contributing 17.5 points. The 6.25 point difference in the final score is enough to change the recommendation ranking. This is intentional: RISE was designed to surface cultural and community uses above purely economic ones when civil rights heritage is nearby.
+Heritage boost explained: The heritage boost is RISE's most distinctive feature. It is not a bonus on top of the score — it is built into the formula. It surfaces cultural and community uses above purely economic ones when civil rights heritage is nearby. This is intentional — RISE reflects Montgomery's values.
 
 Civil rights heritage anchors used by RISE:
 - Rosa Parks Museum, 252 Montgomery Street. Heritage boost: +25pts. Boost radius: 0.5 miles.
 - The Legacy Museum, 115 Coosa Street. Heritage boost: +20pts. Boost radius: 0.5 miles.
 
+Hero parcel heritage scores:
+- Parcel A (Bibb Street): 0.167 miles from Rosa Parks Museum — full +25pt boost fires. Heritage score approximately 78.
+- Parcel B (Upper Wetumpka Road): 0.25 miles from The Legacy Museum — full +20pt Legacy Museum boost fires. Rosa Parks Museum also 0.33 miles away — within 0.5-mile radius. Heritage score approximately 55.
+- Parcel C (1600 Terminal Road): 3.1 miles from Rosa Parks Museum — no heritage boost fires. Heritage score approximately 5.
+
 ---
 DOCUMENT: Scoring — Industrial Dimension
 PARCEL_ID: general
 TOPIC: scoring_industrial
----
+
 Industrial score weight: 20% of final score.
 
-What it measures: Proximity to technology, military, and education anchors that drive workforce and economic activity. RISE treats these as "industrial" anchors because they represent the demand side of the workforce equation — where jobs are, or where infrastructure investment is concentrated.
+What it measures: Proximity to technology, military, and education anchors that drive workforce and economic activity. RISE treats these as industrial anchors because they represent the demand side of the workforce equation — where jobs are, or where infrastructure investment is concentrated.
 
 How it is calculated:
 - MGMix Internet Exchange: boost +20pts, radius 1.0 mile. Score = 20 + 70 × (1 - distance/1.0) if within 1 mile.
@@ -46,111 +51,118 @@ How it is calculated:
 - Beyond 2× radius: score = 5.
 - Best score across all industrial anchors is used.
 
-What MGMix is: MGMix is the Montgomery Internet Exchange node — a facility where internet service providers and large content networks (AWS, Google, Meta) interconnect their networks. When a major technology company builds data infrastructure near an IX node, they create local demand for network operations, cybersecurity, and IT support jobs. RISE identifies parcels near MGMix as high-priority for technology workforce development.
+What MGMix is: MGMix is the Montgomery Metropolitan Internet Exchange — a facility where internet service providers and large technology companies (AWS, Google, Meta) interconnect their networks. Meta has committed $1.5 billion for a 1.3 million square foot data centre approximately 2 miles east of Parcel B. Parcels near MGMix are RISE's top candidates for technology workforce development.
 
-What Maxwell AFB is: Maxwell Air Force Base is a major federal military installation in Montgomery employing approximately 7,500 military and civilian personnel. It is also home to Air University, the US Air Force's professional military education centre. Veterans transitioning out of Maxwell AFB need civilian workforce skills. RISE identifies parcels near Maxwell as high-priority for veteran workforce development.
+What Maxwell AFB is: Maxwell Air Force Base employs approximately 14,500 military and civilian personnel in Montgomery. It is home to Air University, the US Air Force's professional military education centre. Veterans transitioning out of Maxwell AFB need civilian workforce skills.
+
+Hero parcel industrial scores:
+- Parcel A (Bibb Street): MGMix approximately 0.15 miles away — full +20pt MGMix boost fires. Industrial score approximately 80.
+- Parcel B (Upper Wetumpka Road): MGMix only 0.214 miles away — highest industrial proximity of all three hero parcels. Industrial score approximately 85.
+- Parcel C (1600 Terminal Road): MGMix 2.9 miles away — outside boost radius. Industrial score approximately 12.
 
 ---
 DOCUMENT: Scoring — Activity Dimension (ArcGIS Foot Traffic)
 PARCEL_ID: general
 TOPIC: scoring_activity
----
+
 Activity score weight: 15% of final score.
 
-What it measures: Real foot traffic near the parcel, derived from the City of Montgomery's Most Visited Locations dataset served through ArcGIS. This replaces the earlier Bright Data / Google SERP approach. The ArcGIS data is the city's own measurement of which named locations are actually visited — a more credible and freely available signal.
+What it measures: Real foot traffic near the parcel, derived from the City of Montgomery's Most Visited Locations dataset served through ArcGIS. The ArcGIS data is the city's own measurement of which named locations are actually visited — a credible, freely available signal requiring no API key.
 
-Data source: Montgomery ArcGIS FeatureServer — Most Visited Locations layer. Free, no API key required. Field used: F__of_Visits (total recorded visits per location).
+Data source: Montgomery ArcGIS FeatureServer — Most Visited Locations layer. Free, no API key required.
 
 How it is calculated:
 1. Query all named locations within 1 mile (5,280 feet) of the parcel.
-2. For each location, compute Haversine distance from parcel to location.
-3. Assign a proximity weight based on distance:
-   - Less than 0.25 miles: weight 1.0 (direct draw)
-   - 0.25 to 0.50 miles: weight 0.7
-   - 0.50 to 0.75 miles: weight 0.4
-   - Greater than 0.75 miles: weight 0.2
+2. Compute Haversine distance from parcel to each location.
+3. Assign proximity weight: under 0.25 miles = 1.0, 0.25–0.50 miles = 0.7, 0.50–0.75 miles = 0.4, over 0.75 miles = 0.2.
 4. Compute weighted score: sum of (visits/max_visits × proximity_weight) divided by min(location_count, 10), multiplied by 100.
 5. Add a floor of 15 points if any locations were found.
 
-What a high activity score means: High foot traffic near the parcel confirms that people are already moving through this area. A community use here captures existing movement rather than betting on new demand.
-
-What a low activity score means: Low foot traffic can mean two things. For Parcels A and B, it means moderate neighbourhood activity. For Parcel C, it means the neighbourhood is underserved — there is nothing nearby worth visiting. A low activity score in a food desert context is evidence of the problem, not evidence of low demand.
+Hero parcel activity context:
+- Parcel A (Bibb Street): Rosa Parks Museum 8,420 visits, Dexter Avenue King Memorial 6,250 visits, Civil Rights Memorial Center 5,100 visits within 1 mile. Activity score approximately 70.
+- Parcel B (Upper Wetumpka Road): The Legacy Museum approximately 6,250 visits, Rosa Parks Museum approximately 8,420 visits within 1 mile. Activity score approximately 55.
+- Parcel C (1600 Terminal Road): West Montgomery Community Center approximately 3,800 visits — no grocery or retail destination within 1 mile. Activity score approximately 30. Low activity in a food desert means underservice, not low demand.
 
 ---
 DOCUMENT: Scoring — Proximity, Economic, Vacancy Dimensions
 PARCEL_ID: general
 TOPIC: scoring_proximity_economic_vacancy
----
+
 Proximity score weight: 10% of final score.
-What it measures: Raw Haversine distance to the nearest anchor point of any type.
-Formula: 100 × (1 - min_distance / 2.0). A parcel 0 miles from an anchor scores 100. A parcel 2 miles away scores 0. Beyond 2 miles is outside RISE's consideration range for these hero parcels.
+Formula: 100 × (1 - min_distance / 2.0). A parcel 0 miles from an anchor scores 100. A parcel 2 miles away scores 0.
+
+Hero parcel proximity scores:
+- Parcel A: 0.167 miles from Rosa Parks Museum. Proximity score approximately 92.
+- Parcel B: 0.214 miles from MGMix. Proximity score approximately 89.
+- Parcel C: 0.702 miles from West Montgomery Community Center. Proximity score approximately 65.
 
 Economic score weight: 10% of final score.
 What it measures: Whether the parcel's acreage is the right size for its zone type.
 Ideal ranges by zone:
-- Heritage zone: 0.25 to 3.0 acres. A cultural plaza or community centre needs space but not a massive footprint.
-- IX Hub / Industrial zone: 1.0 to 10.0 acres. A training facility or co-working campus needs room for classrooms, parking, and expansion.
-- Food desert zone: 0.5 to 5.0 acres. A community grocery and urban farm needs operational space and parking.
-If acreage falls in the ideal range: score = 100.
-If too small: score = max(10, (actual/ideal_min) × 80).
-If too large: score = max(30, (ideal_max/actual) × 90). Large parcels can be subdivided — they still score well.
+- Heritage zone: 0.25 to 3.0 acres.
+- IX Hub / Industrial zone: 1.0 to 10.0 acres.
+- Food desert zone: 0.5 to 5.0 acres.
+If too large: score = max(30, (ideal_max/actual) × 90). Large parcels can be subdivided.
+
+Hero parcel economic scores:
+- Parcel A: 8.34 acres in a heritage zone (ideal 0.25–3.0). Larger than ideal — can be subdivided. Economic score approximately 35.
+- Parcel B: 2.43 acres in an IX hub zone (ideal 1.0–10.0). Within ideal range. Economic score approximately 60.
+- Parcel C: 6.20 acres in a food desert zone (ideal 0.5–5.0). Slightly above ideal but can accommodate grocery plus urban farm plus plaza. Economic score approximately 80.
 
 Vacancy score weight: 10% of final score.
-What it measures: How likely the parcel is to be vacant and ready for development.
-Data source: GIS improvement value field (ImpValue). $0 improvement value = almost certainly vacant land with no structures. This scores 90. Under $5,000 improvement value scores 70. Under $50,000 scores 40. Over $50,000 scores 20 — likely has existing structures that need demolition or renovation. All three hero parcels have ImpValue = $0 and score 90 on vacancy.
+Data source: GIS improvement value (ImpValue). $0 = almost certainly vacant. All three hero parcels have ImpValue = $0 and score approximately 90 on vacancy.
 
 ---
 DOCUMENT: Scoring — Flood Risk and 311 Distress Dimensions
 PARCEL_ID: general
 TOPIC: scoring_flood_311
----
-Flood risk score weight: 5% of final score. Scale: 0 to 5 (not 0 to 100).
 
-What it measures: Whether the parcel falls within a FEMA flood hazard zone. High flood risk makes development more expensive (flood-proofing requirements) and more dangerous (liability for city if flooding occurs after development).
+Flood risk score weight: 5% of final score. Scale: 0 to 5.
 
-Data source: Montgomery OneView Flood Hazard Areas, served through Montgomery GIS ArcGIS FeatureServer. Free, no API key.
+Data source: Montgomery OneView Flood Hazard Areas, via Montgomery GIS ArcGIS FeatureServer. Free, no API key.
 
 Scoring:
-- Zone AE, A, AH, AO, VE, V, or FLOODWAY designation: 0 points. High flood risk — development strongly discouraged without major mitigation.
-- Zone X500, B, or C: 2 points. Moderate risk — 500-year floodplain.
-- Zone X or D: 5 points. Low risk — minimal flood hazard.
-- No zone found (parcel outside all mapped hazard areas): 5 points. Assumed Zone X.
+- Zone AE, A, AH, AO, VE, V, or FLOODWAY: 0 points.
+- Zone X500, B, or C: 2 points.
+- Zone X or D: 5 points.
+- No zone found: 5 points (assumed Zone X).
 
-All three hero parcels score 5 out of 5 — all fall in Zone X (minimal flood risk).
+All three hero parcels score 5 out of 5 — all fall in FEMA Zone X (minimal flood risk).
 
 311 distress score weight: 5% of final score. Scale: 0 to 10.
 
-What it measures: Community distress signal from 311 service request call density. 311 is Montgomery's non-emergency service request line. Residents call 311 to report issues like overgrown grass on vacant lots, illegal dumping, abandoned vehicles, and infrastructure problems. High call density near a parcel signals that the community is actively identifying neglect — which also means the community wants the land fixed.
-
-Data source: Montgomery 311 Service Requests, served through Montgomery GIS ArcGIS MapServer. Free, no API key. Looks back 90 days. Queries within 0.5-mile radius of parcel.
+What it measures: Community distress signal from 311 service request call density within 0.5 miles of the parcel in the last 90 days.
 
 Scoring:
-- Density over 50 calls per square mile: 10 points. Critical distress.
-- Density 20–50: 7 points. High distress.
-- Density 10–20: 4 points. Moderate distress.
-- Density under 10: 2 points. Low distress.
-- Bonus: if more than 30% of calls are vacant-lot-related (Overgrown Grass, Illegal Dumping, Vacant Building, Debris), add 2 points. Maximum 10.
+- Density over 50 calls per square mile: 10 points.
+- Density 20–50: 7 points.
+- Density 10–20: 4 points.
+- Density under 10: 2 points.
+- Bonus: if over 30% of calls are vacant-lot-related (Overgrown Grass, Illegal Dumping, Vacant Building, Debris), add 2 points. Maximum 10.
 
-Higher 311 score = higher community urgency = intervention is more needed. This dimension was added based on mentor feedback from Haley at Alabama State University, who recommended considering 311 call density as a community distress signal.
+Hero parcel 311 scores:
+- Parcel A (Bibb Street): approximately 4 out of 10. Moderate distress.
+- Parcel B (Upper Wetumpka Road): approximately 5 out of 10. Moderate distress.
+- Parcel C (1600 Terminal Road): approximately 7 out of 10. High distress — vacant-lot complaints exceed 30%, bonus fires.
 
 ---
 DOCUMENT: Scoring — Final Score and Urgency Flag
 PARCEL_ID: general
 TOPIC: scoring_final
----
+
 Final score formula:
 Final = (Heritage × 0.25) + (Industrial × 0.20) + (Activity × 0.15) + (Proximity × 0.10) + (Economic × 0.10) + (Vacancy × 0.10) + (Flood × 0.05 × 20) + (311 × 0.05 × 10)
 
-Note: Flood and 311 scores are scaled to a 0–100 equivalent before weighting, so a flood score of 5/5 contributes 5 points (5 × 20 × 0.05 = 5) and a 311 score of 7/10 contributes 3.5 points.
+Note: Flood (0–5) and 311 (0–10) are scaled to 0–100 equivalent before weighting. Flood score of 5/5 contributes 5 points (5 × 20 × 0.05). 311 score of 7/10 contributes 3.5 points (7 × 10 × 0.05).
 
 Urgency flag thresholds:
-- Final score 75 or above: HIGH urgency
-- Final score 55–74: MEDIUM urgency
-- Final score below 55: LOW urgency
+- Final score 75 or above: HIGH urgency.
+- Final score 55–74: MEDIUM urgency.
+- Final score below 55: LOW urgency.
 
-Hero parcel final scores (approximate, based on fallback data):
-- Parcel A (Heritage): 74 out of 100. Urgency: medium.
-- Parcel B (IX Hub): 29 out of 100. Urgency: low by score, medium by grant deadline.
-- Parcel C (Food Desert): 72 out of 100. Urgency: medium by score, HIGH by community need and grant deadline.
+Hero parcel final scores (approximate, based on correct parcel data):
+- Parcel A (Bibb Street, 8.34 acres): approximately 74 out of 100. Urgency: medium.
+- Parcel B (Upper Wetumpka Road, 2.43 acres): approximately 72 out of 100. Urgency: medium. Dual-anchor parcel — MGMix industrial boost at 0.214 miles and Legacy Museum heritage boost at 0.25 miles both fire.
+- Parcel C (1600 Terminal Road, 6.20 acres): approximately 48 out of 100. Urgency: LOW by score but HIGH by community need and grant deadline. The food desert story and USDA grant coverage make this the highest-impact intervention despite the lower numeric score.
 
-Why the scores do not tell the whole story: Parcel B scores 29 but has a compelling workforce development narrative tied to Maxwell AFB and the IX node. Parcel C scores 72 but has the most acute community need and the shortest grant window. RISE uses scores to rank, but Gemini AI uses the full context — including health flags, grant deadlines, and foot traffic patterns — to generate recommendations that go beyond the number.
+Why the scores do not tell the whole story: Parcel C scores 48 but has the most acute community need — 32% food insecurity, nearest grocery 1.4 miles, USDA covers 75% of costs. Parcel B scores approximately 72 with correct dual-anchor proximity — significantly higher than its previous incorrect calculation that used wrong coordinates and wrong acreage. RISE uses scores to rank, but Gemini AI uses the full context — including health flags, grant deadlines, and foot traffic patterns — to generate recommendations that go beyond the number.

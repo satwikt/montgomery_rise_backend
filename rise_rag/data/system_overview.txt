@@ -1,0 +1,64 @@
+DOCUMENT: RISE v4 — Unified System Overview
+PARCEL_ID: general
+TOPIC: system_overview
+---
+RISE v4.0 is the unified Montgomery RISE system that combines two previously separate components into a single FastAPI server:
+
+1. The scoring pipeline (rise_selector_v3): Queries live city data APIs (ArcGIS, FEMA flood hazard, Montgomery 311), computes 8-dimension parcel scores, and uses Gemini 2.5 Pro to generate recommendations.
+
+2. The RAG chatbot (ChromaDB + sentence-transformers + Groq): A retrieval-augmented generation system that answers natural-language questions about the parcels, scoring model, grants, and Montgomery community context using the RISE knowledge base.
+
+The unified API runs as a single Railway deployment with 7 endpoints:
+- GET /  — health check showing status of both scoring pipeline and RAG
+- GET /parcels  — list all 3 hero parcels
+- GET /parcels/{id}/score  — full scoring pipeline (Gemini analysis)
+- POST /parcels/custom  — scoring for arbitrary lat/lon
+- GET /parcels/{id}/answer  — RAG AI summary from knowledge base (Groq)
+- POST /chat/ask  — free-form RAG question
+- POST /chat/stream  — streaming RAG answer via Server-Sent Events
+
+The RAG system uses Groq's free tier (llama-3.3-70b-versatile) rather than Gemini because Groq has no token-per-minute limits for the free tier, is faster, and requires no credit card. Gemini is still used for the scoring pipeline's recommendation generation.
+
+---
+DOCUMENT: RISE — Hackathon Submission Context
+PARCEL_ID: general
+TOPIC: hackathon_context
+---
+RISE was built for the World Wide Vibes (WWVibes) Hackathon hosted at Alabama State University in Montgomery, Alabama. The hackathon submission deadline is Monday, March 9, 2026 at 9:00 AM Central Time.
+
+Track: Workforce and Economic Growth. RISE also covers Smart Cities (ArcGIS integration, data-driven planning) and Civic Access (community health equity, food desert intervention, heritage preservation).
+
+The hackathon team built RISE over multiple days, incorporating mentor feedback from Haley at Alabama State University who suggested adding flood risk flags and 311 call density as community distress signals. Both suggestions were implemented in rise_selector_v3.py.
+
+The project demonstrates a working, deployed API with live data from Montgomery's own GIS infrastructure. Every data source is free, public, and traceable. No proprietary data is used.
+
+---
+DOCUMENT: RISE — RAG Chatbot Technical Details
+PARCEL_ID: general
+TOPIC: rag_technical
+---
+The RISE RAG chatbot is built with the following components:
+
+Embeddings: sentence-transformers all-MiniLM-L6-v2. This is a local model (no API key) that generates 384-dimensional semantic vectors. It is downloaded once from HuggingFace and cached. It is fast, free, and good at retrieval tasks.
+
+Vector database: ChromaDB (persistent). The knowledge base is stored in a local chroma_db folder inside the rise_rag directory. The collection is named rise_knowledge. Chunks are upserted (safe to re-run ingestion). The database persists across server restarts.
+
+Ingestion: Run python rise_rag/scripts/ingest.py once to build the database. This reads all .txt files in rise_rag/data/, parses them into document chunks using the DOCUMENT/PARCEL_ID/TOPIC metadata headers, generates embeddings, and stores them in ChromaDB.
+
+Retrieval: The Retriever class performs semantic similarity search (L2 distance). It supports optional parcel-scoped filtering — if parcel_filter="A", it restricts results to chunks tagged parcel_id=A or parcel_id=general. Top-5 results are assembled into a context string for the LLM.
+
+LLM: Groq API, model llama-3.3-70b-versatile. Free tier: 14,400 requests per day, 30 requests per minute. No credit card required. Temperature 0.1 for factual, grounded answers.
+
+The chatbot also maintains a short conversation history (last 6 turns) to support follow-up questions. It uses query enrichment to handle follow-up questions like "what about Parcel B?" by appending the previous user query.
+
+Knowledge base files (in rise_rag/data/):
+- community_context.txt: Montgomery history, civil rights economy, food desert stats, MGMix tech economy, vacant land context
+- data_sources.txt: ArcGIS, FEMA, 311, Grants.gov, Gemini — technical explainers
+- glossary_and_scope.txt: All key terms, out-of-scope responses
+- grants_detail.txt: Full grant detail for USDA RED Q3, USDA VAPG, HUD CDBG, EDA Tech Hubs, Opportunity Zones
+- parcel_a_heritage.txt: Parcel A complete — overview, anchor proximity, heritage boost, scores, recommendations, grants, health context
+- parcel_b_ix_hub.txt: Parcel B complete — overview, anchor proximity, scores, recommendations, grants, workforce context
+- parcel_c_food_desert.txt: Parcel C complete — overview, anchor proximity, scores, recommendations, grants, health context
+- qa_pairs.txt: 20 pre-planned Q&A pairs covering the most likely hackathon demo questions
+- scoring_engine.txt: Full explanation of all 8 scoring dimensions, weights, formulas
+- system_overview.txt: This file — v4 unified system, RAG technical details, hackathon context

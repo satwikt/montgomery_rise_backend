@@ -1,8 +1,11 @@
 """
-retriever.py — Query logic for RISE RAG.
+retriever.py — Semantic retrieval and context assembly for the RISE RAG subsystem.
 
-Takes a user question, retrieves relevant chunks from ChromaDB,
-and assembles them into a formatted context string for the LLM.
+Responsibilities
+----------------
+* Accept a natural-language query and optional parcel scope.
+* Retrieve the most relevant knowledge-base chunks from ChromaDB.
+* Assemble the retrieved chunks into a formatted context string for the LLM.
 """
 
 from __future__ import annotations
@@ -10,26 +13,33 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from .embeddings import VectorStore
 from .config import TOP_K_RESULTS
+from .embeddings import VectorStore
 
 logger = logging.getLogger(__name__)
 
+# Parcel IDs that may be used as filter scopes.
+_VALID_PARCEL_FILTERS: frozenset[str] = frozenset({"A", "B", "C"})
 
-# ─── Retriever Class ──────────────────────────────────────────────────────────
 
 class Retriever:
     """
-    Retrieves relevant knowledge base chunks for a given user query.
-    
-    Handles:
-    - Semantic similarity search via VectorStore
-    - Optional parcel-scoped filtering
-    - Context assembly for prompt injection
+    Retrieves relevant knowledge-base chunks for a given user query.
+
+    Supports optional parcel-scoped filtering via ChromaDB metadata
+    predicates so that questions about a specific parcel retrieve chunks
+    tagged with that parcel (or marked as general knowledge).
+
+    Parameters
+    ----------
+    vector_store:
+        An initialised :class:`~embeddings.VectorStore` instance.
     """
 
     def __init__(self, vector_store: VectorStore) -> None:
         self._store = vector_store
+
+    # ── public ────────────────────────────────────────────────────────────────
 
     def retrieve(
         self,
@@ -38,24 +48,36 @@ class Retriever:
         parcel_filter: str | None = None,
     ) -> list[dict[str, Any]]:
         """
-        Retrieve the most relevant chunks for a query.
-        
-        Args:
-            query: User question string.
-            top_k: Max number of chunks to return.
-            parcel_filter: If set to "A", "B", or "C", restricts search to
-                           chunks for that specific parcel (plus "general" chunks).
-                           If None, searches all chunks.
-        
-        Returns:
-            List of result dicts (id, text, metadata, distance).
+        Retrieve the most semantically relevant chunks for *query*.
+
+        Parameters
+        ----------
+        query:
+            The user's question or enriched search string.
+        top_k:
+            Maximum number of chunks to return.
+        parcel_filter:
+            If set to ``'A'``, ``'B'``, or ``'C'``, restricts results to
+            chunks tagged with that parcel ID **or** ``'general'``.  ``None``
+            searches the entire knowledge base.
+
+        Returns
+        -------
+        list[dict]
+            Each dict contains ``id``, ``text``, ``metadata``, and
+            ``distance`` keys.
         """
-        where_filter = None
-        if parcel_filter and parcel_filter.upper() in {"A", "B", "C"}:
-            # ChromaDB $in operator to match either the specific parcel or general
-            where_filter = {
-                "parcel_id": {"$in": [parcel_filter.upper(), "general"]}
-            }
+        where_filter: dict[str, Any] | None = None
+
+        if parcel_filter is not None:
+            pid = parcel_filter.upper()
+            if pid in _VALID_PARCEL_FILTERS:
+                # ChromaDB ``$in`` operator: match the specific parcel OR general chunks.
+                where_filter = {"parcel_id": {"$in": [pid, "general"]}}
+            else:
+                logger.warning(
+                    "Invalid parcel_filter '%s' — ignoring filter.", parcel_filter
+                )
 
         results = self._store.query(
             query_text=query,
@@ -64,16 +86,25 @@ class Retriever:
         )
 
         logger.debug(
-            "Retrieved %d chunks for query: '%s'", len(results), query[:80]
+            "Retrieved %d chunks for query: '%.80s' (parcel_filter=%s)",
+            len(results),
+            query,
+            parcel_filter,
         )
         return results
 
     def build_context(self, results: list[dict[str, Any]]) -> str:
         """
         Assemble retrieved chunks into a single context string for the LLM.
-        
-        Each chunk is separated by a clear divider and prefixed with its
-        source metadata so the LLM can reference it if needed.
+
+        Each chunk is separated by a divider and prefixed with its source
+        metadata so the model can attribute information if needed.
+
+        Returns
+        -------
+        str
+            Formatted context string, or a brief message when no chunks
+            are available.
         """
         if not results:
             return "No relevant context found in the knowledge base."
@@ -84,7 +115,6 @@ class Retriever:
             source = meta.get("source_file", "unknown")
             parcel = meta.get("parcel_id", "general")
             topic = meta.get("topic", "general")
-
             header = f"[Source {i}: {source} | parcel={parcel} | topic={topic}]"
             parts.append(f"{header}\n{result['text']}")
 
@@ -97,11 +127,13 @@ class Retriever:
         parcel_filter: str | None = None,
     ) -> tuple[str, list[dict[str, Any]]]:
         """
-        Convenience method: retrieve chunks and return both context string
-        and the raw results list.
-        
-        Returns:
-            (context_string, results_list)
+        Convenience method: retrieve chunks and return both the assembled
+        context string and the raw results list.
+
+        Returns
+        -------
+        tuple[str, list[dict]]
+            ``(context_string, results_list)``
         """
         results = self.retrieve(query, top_k=top_k, parcel_filter=parcel_filter)
         context = self.build_context(results)

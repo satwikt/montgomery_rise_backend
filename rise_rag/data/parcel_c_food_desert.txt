@@ -1,89 +1,92 @@
-DOCUMENT: Parcel C — Economic Urgency / Food Desert Story
+DOCUMENT: Parcel C — Community Resilience and Food Access Overview
 PARCEL_ID: C
 TOPIC: parcel_overview
----
-Parcel C is a city-owned vacant parcel located on Coosa Street, Montgomery, Alabama, ZIP code 36104. The parcel ID is 11 01 12 4 004 001.000. It is owned by the City of Montgomery. The parcel is 8.34 acres in size. Its coordinates are 32.3792 latitude, -86.3087 longitude. The improvement value is $0, confirming it is vacant and undeveloped. The zone context is food_desert. RISE classifies this as the Economic Urgency parcel. It is located in a USDA-designated food desert — an area where residents lack reasonable access to affordable, nutritious food. The nearest grocery store is 2.8 miles away. Over 6,200 residents in this zone have no grocery option within walking distance or a short transit ride.
+
+Parcel C is a city-owned vacant parcel located at 1600 Terminal Road, Montgomery, Alabama, ZIP code 36108 (Maxwell Heights / Gibbs Village neighbourhood). The GIS parcel ID is 11 06 23 2 003 001.000. It is owned by the City of Montgomery. The parcel is 6.20 acres in size. Its coordinates are 32.358433 latitude, -86.338177 longitude. The improvement value is $0, confirming it is vacant and undeveloped. The zone context is food_desert. RISE classifies this as the Community Resilience and Food Access parcel. The nearest anchor is the West Montgomery Community Center at 0.702 miles. The parcel is in ZIP code 36108 — a confirmed USDA food desert where 32% of residents experience food insecurity, the poverty rate is 35%, and the nearest full grocery store (Piggly Wiggly / Food Outlet on West Fairview Avenue) is approximately 1.4 miles away. Transportation barriers are the root cause of food inequity here — confirmed by PIH 2024 data.
 
 ---
 DOCUMENT: Parcel C — Anchor Proximity
 PARCEL_ID: C
 TOPIC: anchor_proximity
----
-Parcel C is 0.117 miles from MGMix, the Montgomery Internet Exchange node — its nearest anchor. This is the closest proximity of any of the three hero parcels to its nearest anchor. MGMix is a digital infrastructure anchor with a 1.0-mile boost radius. The Rosa Parks Museum is approximately 0.22 miles from this parcel, and The Legacy Museum is approximately 0.25 miles away. Alabama State University is approximately 1.8 miles away. Maxwell AFB Gate is approximately 2.4 miles away. Parcel C sits in the downtown Montgomery zone, adjacent to the civil rights heritage corridor and the digital infrastructure node simultaneously. This dual proximity is unusual and creates a scoring environment where both heritage and industrial boosts partially fire.
+
+Parcel C's nearest anchor is the West Montgomery Community Center at 0.702 miles. This is the furthest any hero parcel sits from its nearest anchor — but that distance is itself the story: the 36108 community is underserved by infrastructure and amenities, and Parcel C represents the most significant opportunity for community impact. Maxwell AFB Gate is approximately 1.8 miles away, within the 2.0-mile extended proximity range. MGMix IX Node is approximately 2.9 miles away. The Rosa Parks Museum is approximately 3.1 miles away. The Legacy Museum is approximately 3.2 miles away. Alabama State University is approximately 2.0 miles away. The anchor proximity score for Parcel C is lower than Parcels A and B, but the 311 distress score and food desert urgency elevate the overall RISE priority.
 
 ---
 DOCUMENT: Parcel C — RISE Scores
 PARCEL_ID: C
 TOPIC: scores
----
+
 Parcel C RISE scoring breakdown across all 8 dimensions:
 
-Heritage score: 78 out of 100. The Rosa Parks Museum is approximately 0.22 miles away — within the 0.5-mile heritage boost radius. The +25pt Rosa Parks Museum boost fires. The Legacy Museum is approximately 0.25 miles away — also within its 0.5-mile radius, adding a potential +20pt boost. Heritage score is high despite the food desert zone context.
+Heritage score: approximately 5 out of 100. No civil rights landmarks are within the 0.5-mile heritage boost radius. The Rosa Parks Museum is 3.1 miles away — no heritage boost fires.
 
-Industrial score: 81 out of 100. MGMix is only 0.117 miles away, well within the 1.0-mile digital infrastructure boost radius. The +20pt MGMix boost fires at nearly full strength: 20 + 70 × (1 - 0.117/1.0) = approximately 82.
+Industrial score: approximately 12 out of 100. MGMix is 2.9 miles away — outside the 1.0-mile boost radius. Maxwell AFB at 1.8 miles is within the 2.0-mile extended range but below the 1.0-mile industrial boost threshold. No industrial anchor boost fires.
 
-Activity score: 29 out of 100. This is the lowest activity score of the three parcels. ArcGIS Most Visited Locations within 1 mile shows the Montgomery Area Food Bank at 3,100 visits, Blount Cultural Park at 2,600 visits, and E.D. Nixon Elementary School at 1,900 visits. No high-traffic retail or entertainment destination exists within 1 mile — which is precisely the problem this parcel can solve. Low foot traffic confirms underservice, not low demand.
+Activity score: approximately 30 out of 100. ArcGIS Most Visited Locations shows the West Montgomery Community Center with approximately 3,800 visits and a nearby elementary school with approximately 2,100 visits. No high-traffic retail or food destination exists within 1 mile. This low activity score tells the food desert story — the absence of a grocery confirms the gap, not low demand.
 
-Proximity score: 94 out of 100. Calculated as 100 × (1 - 0.117/2.0). The highest proximity score of the three parcels.
+Proximity score: approximately 65 out of 100. Calculated as 100 x (1 - 0.702/2.0). Moderate proximity to nearest anchor.
 
-Economic score: 100 out of 100. At 8.34 acres, this parcel falls within the 0.5–5.0 acre ideal range when considering subdivision for a community grocery or health facility. A standard community grocery co-op typically requires 1.5–3 acres including parking. This parcel can accommodate the full footprint and a community plaza.
+Economic score: approximately 80 out of 100. At 6.20 acres, this parcel is within the ideal range for a community grocery co-op (typically 1.5–3 acres including parking), with significant remaining land for a community plaza, urban farm, or health clinic co-location.
 
-Vacancy score: 90 out of 100. Improvement value is $0. A $0 improvement value scores at the 90-point vacant level — the highest vacancy confidence rating.
+Vacancy score: approximately 90 out of 100. Improvement value is $0.
 
-Flood risk score: 5 out of 5. Falls in FEMA Zone X — minimal flood risk. No flood hazard area intersects this location.
+Flood risk score: 5 out of 5. FEMA Zone X — minimal flood risk.
 
-311 distress score: 7 out of 10. High distress density — approximately 28 calls per square mile in the last 90 days. Top complaint types include Overgrown Grass, Illegal Dumping, and Vacant Building concerns. Because vacant-lot-related complaints exceed 30% of total calls, the bonus +2 points fires, pushing from 5 to 7. This signals that the community is actively flagging the neglected state of this land.
+311 distress score: approximately 7 out of 10. High distress density in this corridor. Dominant complaint types: overgrown grass, illegal dumping, vacant building concerns. The vacant-lot complaint concentration exceeds 30% of total calls — the +2 bonus fires. The community has been documenting the neglect of this land through 311 for years.
 
-Final RISE score: 72 out of 100. Despite the food desert zone context, the high heritage and industrial scores from dual anchor proximity pull the final score up. Urgency flag: medium by score, but HIGH by grant deadline and community need.
+Final RISE score: approximately 48 out of 100. The low heritage and industrial scores reflect the lack of nearby anchor boosts. However, the food desert urgency, high 311 distress, and open grant windows make this the highest-community-impact parcel of the three.
 Score weights: Heritage 25%, Industrial 20%, Activity 15%, Proximity 10%, Economic 10%, Vacancy 10%, Flood 5%, 311 5%.
+Urgency flag: HIGH — grant deadline and community need are both critical.
 
 ---
 DOCUMENT: Parcel C — AI Recommendations
 PARCEL_ID: C
 TOPIC: recommendations
+
+RISE top 3 land reuse recommendations for Parcel C:
+
+Recommendation 1: Community Grocery Co-op. The 36108 ZIP is a USDA-confirmed food desert. The nearest full grocery (Piggly Wiggly / Food Outlet on West Fairview Avenue) is 1.4 miles away — unreachable without a car on Montgomery's 60-minute bus schedule. 32% of residents experience food insecurity and 35% live below the poverty line. The Montgomery Area Food Bank visits in ArcGIS confirm residents are actively seeking food resources. At 6.20 acres, this parcel can accommodate a full community grocery co-op footprint (1.5–3 acres) plus parking and a community plaza. A community grocery co-op immediately becomes the highest-visit destination in this zone upon opening. USDA REDLG Q4 covers 75% of costs — on a $500,000 project, the city's out-of-pocket is $125,000. Cost tier: Mid-Term $500K–$5M. Grant: USDA REDLG Q4, open, 115 days remaining, 75% coverage, 20% match.
+
+Recommendation 2: Community Health and Wellness Centre. The 36108 community bears a disproportionate chronic disease burden — asthma, diabetes, hypertension, and heart disease are all elevated per PIH 2024. A health clinic co-located with the grocery co-op creates a community wellness hub. Transportation barriers that prevent grocery access also prevent clinic access. Combining both on one 6.20-acre site solves both problems simultaneously. HRSA Federally Qualified Health Center (FQHC) programme eligible. Cost tier: Mid-Term $500K–$5M. Grant: USDA REDLG Q4 plus HRSA FQHC grant.
+
+Recommendation 3: Urban Farm, Market, and Community Plaza. A lower-cost immediate intervention — an urban farm on 1–2 acres of this 6.20-acre parcel can begin producing food within one growing season. A weekend market activates the public space and generates foot traffic immediately. The Opportunity Zone tax incentive applies here — investors receive federal tax benefits for investing in this census tract, reducing the city's required match. USDA VAPG covers 50% of urban farm and market build-out costs. Cost tier: Quick Win under $500K. Grant: USDA VAPG, open, 39 days remaining, 50% coverage with 1:1 match.
+
+One-line summary: Food desert priority parcel in 36108 — 32% food insecurity, nearest grocery 1.4 miles, USDA covers 75% of costs. Highest community impact of the three parcels.
+
 ---
-RISE recommends the following top 3 land reuse options for Parcel C:
-
-Recommendation 1: Community Grocery Co-op. Fit score: 29 out of 100 on activity (reflects absence of grocery, not low demand). Cost tier: Mid-Term $500K–$5M. This USDA food desert zone has 6,200 residents with no grocery within 2.8 miles. The ArcGIS foot traffic data tells the story in reverse — the absence of a high-visit grocery destination within 1 mile confirms the gap. The Montgomery Area Food Bank at 3,100 visits shows that residents are actively seeking food resources. A community grocery co-op here immediately becomes the highest-visit destination in this zone. The 311 distress data — 28 calls per square mile, dominated by vacant lot complaints — shows the community is waiting for this land to be activated. Grant: USDA Rural Economic Development Q3, open, 26 days remaining, covers 75% of costs. On a $500,000 project, the city's out-of-pocket is $125,000.
-
-Recommendation 2: Community Health Clinic. Fit score: 24 out of 100 on activity. Cost tier: Mid-Term $500K–$5M. West Montgomery's asthma rate is 2.4 times the city average. The nearest primary care clinic is not within this zone. Co-locating a health clinic with a food co-op creates a community wellness hub — an evidence-based model for addressing social determinants of health simultaneously. Grant: HRSA Health Center programme eligible. The federal Health Resources and Services Administration funds Federally Qualified Health Centers (FQHCs) which can operate in underserved food desert areas.
-
-Recommendation 3: Urban Farm and Market. Fit score: 100 out of 100 on economic score. Cost tier: Quick Win under $500K. A lower-cost immediate intervention. An urban farm on 1–2 acres of this 8.34-acre parcel can begin producing food within one growing season. A weekend market activates the public space and generates foot traffic from day one. Opportunity Zone tax incentives apply here — investors receive federal tax benefits for investing in this census tract. Grant: USDA Value Added Producer Grant, open, 41 days remaining, covers 50% of costs with 1:1 match.
-
-One-line summary: Food desert priority parcel — 6,200 residents with no nearby grocery, grant closes in 26 days. Highest urgency of the three parcels.
-
----
-DOCUMENT: Parcel C — Grants
+DOCUMENT: Parcel C — Grants Detail
 PARCEL_ID: C
 TOPIC: grants
----
-Parcel C has two open grant windows as of March 2026 and qualifies for the highest coverage tier of either:
 
-Grant 1: USDA Rural Economic Development Q3. Status: OPEN. Deadline: March 31, 2026 — 26 days remaining. Eligibility: covers up to 75% of total project costs for this specific location. The median household income in the Coosa Street zone is $22,400, which qualifies for the 70–75% coverage tier — the highest tier available. Match requirement: 20%. On a $500,000 community grocery project: USDA covers $375,000, city contributes $125,000. On a $1,000,000 project: USDA covers $750,000, city contributes $250,000. This is the most urgent grant in the RISE portfolio — 26 days remaining.
+Parcel C has two open grant windows as of March 8, 2026 and qualifies for the highest USDA coverage tier:
 
-Grant 2: USDA Value Added Producer Grant. Status: OPEN. Deadline: April 15, 2026 — 41 days remaining. Eligibility: covers up to 50% of costs. Match requirement: 1:1. On a $300,000 urban farm and market build-out: USDA covers $150,000, city or community partner contributes $150,000. Best suited to the Urban Farm and Market recommendation.
+Grant 1: USDA Rural Economic Development Loan and Grant (REDLG) Q4. Status: OPEN. Deadline: approximately July 1, 2026 — 115 days remaining. Eligibility: up to 75% of total project costs for the 36108 zone. The ZIP 36108 median household income of $29,400 and poverty rate of 35% qualify this location for the 75% top coverage tier. Match: 20%. On a $500,000 community grocery project: USDA covers $375,000, city contributes $125,000. On a $1,000,000 project: USDA covers $750,000, city contributes $250,000. This is the most capital-efficient federal grant in the RISE portfolio — the city's out-of-pocket is the lowest of any hero parcel.
 
-Opportunity Zone status: The census tract containing Parcel C is a federally designated Opportunity Zone. This enables private investors to defer and reduce capital gains taxes by investing in qualified businesses in this zone. An Opportunity Zone fund can provide equity financing for a grocery co-op without the city needing to contribute the full match.
+Grant 2: USDA Value Added Producer Grant (VAPG). Status: OPEN. Deadline: approximately April 16, 2026 — 39 days remaining. Eligibility: up to 50% of costs. Match: 1:1. On a $300,000 urban farm and market build-out: USDA covers $150,000, community partner or Opportunity Zone investor covers $150,000. Best suited to the Urban Farm and Market recommendation.
 
-The city's strategic position: At 75% USDA coverage on a $500K project, Montgomery's out-of-pocket is $125,000. This is the most capital-efficient intervention of the three parcels. The data, the need, and the funding alignment converge here.
+Opportunity Zone: The census tract containing Parcel C at 1600 Terminal Road, 36108, is a federally designated Opportunity Zone. Private investors can defer and reduce capital gains tax liability by investing here through a Qualified Opportunity Fund. This mechanism can fund the city's required match — reducing direct city expenditure to near zero on a well-structured project.
+
+The VAPG at 39 days is the more urgent window. REDLG Q4 at 115 days is the higher-coverage grant and the more important one for a grocery co-op.
 
 ---
 DOCUMENT: Parcel C — Health and Community Context
 PARCEL_ID: C
 TOPIC: health_context
----
-Parcel C sits in one of Montgomery's most acutely underserved neighbourhoods. The health and equity indicators are the most severe of the three hero parcels.
 
-Food insecurity: 41% of residents in this census tract experience food insecurity. For children, the rate is even higher. This is approximately 2.5 times the national average of 17%.
+Community health and equity indicators for Parcel C (36108 ZIP — Maxwell Heights / Gibbs Village, ACS 2023 5-Year and PIH 2024):
 
-Nearest grocery store: 2.8 miles away. Without a car, this is an unreachable distance for a routine grocery trip. Montgomery's public transit network, theM, does not provide direct service between this zone and the nearest full-service grocery on the schedule frequency required for regular food shopping.
+Food insecurity: 32.0% of residents experience food insecurity. For children, rates are higher.
+Nearest full grocery: 1.4 miles — Piggly Wiggly / Food Outlet on West Fairview Avenue. Without a car and on Montgomery's 60-minute bus schedule, this is effectively inaccessible for routine grocery shopping.
+Obesity rate: 39.8% (PIH 2024).
+Poverty rate: 35.0% — 1.65 times the Montgomery citywide rate of 21.2%.
+Unemployment rate: 7.3% — above the Alabama state rate of 4.8%.
+Median household income: $29,400.
+Uninsured rate: approximately 10.0%.
+Transportation barrier: confirmed as the root cause of food inequity in this zone (PIH 2024). theM bus routes in 36108 run every 60 minutes — a round-trip grocery trip requires 3–4 hours without a car.
+Chronic conditions: asthma, diabetes, hypertension, and heart disease are all elevated in this community.
 
-Asthma rate: 2.4 times the city average. Vacant land with overgrown vegetation, illegal dumping, and debris — as reflected in the 311 distress data — contributes directly to respiratory illness rates. Activating this parcel removes a health hazard from the environment.
+USDA food desert designation: The 36108 zone meets both USDA food desert criteria — poverty rate above 20% (35.0% here) and more than 500 residents living more than 1 mile from a supermarket. Both criteria are formally met. The USDA ERS designation is confirmed.
 
-Median household income: $22,400. This is 37% of the Montgomery metro median and qualifies this census tract for the highest USDA funding coverage tier.
+311 call pattern: In the 90 days ending March 2026, approximately 7 out of 10 distress score applies — dominant complaint types are overgrown grass, illegal dumping, and vacant building concerns. The community has been documenting the neglect of this land to the city for years through 311 service requests.
 
-Population served: Approximately 6,200 residents live within the 1-mile radius of this parcel without access to a full-service grocery store.
-
-311 call pattern: In the 90 days ending March 2026, approximately 28 service requests per square mile were logged within 0.5 miles of this parcel. Dominant complaint types: Overgrown Grass, Illegal Dumping, Vacant Building. This pattern is characteristic of long-term neglected vacant land — the community has been documenting the problem to the city for years. RISE surfaces this as an urgency signal.
-
-USDA food desert designation: The USDA Economic Research Service formally designates this area as a food desert under the criteria of low income (tract poverty rate above 20%) and low access (more than 500 residents or 33% of the census tract population live more than 1 mile from a supermarket in urban areas). Both criteria are met.
+What activating this parcel means: A community grocery co-op on Parcel C immediately serves approximately 6,200+ residents in the 1-mile radius who currently lack grocery access. Combined with a health clinic, it creates the most impactful community intervention possible on a single 6.20-acre city-owned parcel.
