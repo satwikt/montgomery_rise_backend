@@ -889,7 +889,7 @@ COMMUNITY HEALTH FLAGS:
 
 YOUR TASK:
 
-1. Recommend the top 3 land reuse options for this parcel.
+1. Recommend the top 3 land reuse options for this parcel. Sort these recommendations in descending order by fit_score, ensuring the highest score is Rank 1.
 
 2. STRATEGIC ZONING CONSTRAINT: - If Story is "Heritage", prioritize tourism, local arts, commemorative spaces, and small business incubators. DO NOT recommend food pantries or grocery hubs for Heritage parcels; those are reserved for the "Community Resilience" category.
 
@@ -897,7 +897,7 @@ If Story is "Digital Infrastructure", prioritize tech-workforce training, data c
 
 If Story is "Community Resilience", prioritize food access and health equity.
 
-3. For each recommendation: name, fit_score (0-100), 2-sentence plain-English explanation grounded in the scores above, cost_tier (Quick Win <$500K / Mid-Term $500K-$5M / Major $5M+), grant_flag (reference the open grants above if relevant).
+3. For each recommendation: name,rank (1-3 based on fit_score), fit_score (0-100), 2-sentence plain-English explanation grounded in the scores above, cost_tier (Quick Win <$500K / Mid-Term $500K-$5M / Major $5M+), grant_flag (reference the open grants above if relevant).
 
 4. Speak as a community advocate who understands both data and human impact.
 
