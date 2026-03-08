@@ -4,59 +4,50 @@ Edit this file to change models, paths, and tuning parameters.
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load GROQ_API_KEY from .env file if present
+load_dotenv()
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
 
-# Root of the project (parent of the rise_rag package dir)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-
-# Where the .txt knowledge base files live
 DATA_DIR = PROJECT_ROOT / "data"
-
-# Where ChromaDB persists its vector database
 CHROMA_PERSIST_DIR = PROJECT_ROOT / "chroma_db"
-
-# ChromaDB collection name
 CHROMA_COLLECTION = "rise_knowledge"
 
 # ─── Embedding Model ──────────────────────────────────────────────────────────
 
 # Free, local, no API key. Downloaded once from HuggingFace and cached.
-# all-MiniLM-L6-v2 is fast and produces 384-dim vectors — ideal for this scale.
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 
-# ─── Ollama LLM ───────────────────────────────────────────────────────────────
+# ─── Groq LLM ─────────────────────────────────────────────────────────────────
 
-# Ollama server URL (default local install)
-OLLAMA_BASE_URL = "http://localhost:11434"
+# API key — loaded from environment variable or .env file.
+# Get your free key at: https://console.groq.com
+# Add to your .env file: GROQ_API_KEY=your_key_here
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 
-# Model to use — options (in order of quality vs speed):
-#   mistral        ~4GB — best quality, recommended
-#   llama3.2       ~2GB — fast, good quality
-#   phi3           ~2GB — very fast, lightweight
-#   gemma2:2b      ~1.6GB — smallest option
-OLLAMA_MODEL = "mistral"
+# Model to use.
+# llama-3.3-70b-versatile  — best quality, free tier, recommended
+# llama-3.1-8b-instant     — faster, lighter, still very capable
+# mixtral-8x7b-32768       — large context window
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
-# Ollama generation parameters
-OLLAMA_TEMPERATURE = 0.1      # Low = more factual, less creative. Good for RAG.
-OLLAMA_NUM_CTX = 4096         # Context window size (tokens)
-OLLAMA_TIMEOUT = 120          # Seconds to wait for a response
+# Generation parameters
+GROQ_TEMPERATURE = 0.1    # Low = more factual, less creative. Good for RAG.
+GROQ_MAX_TOKENS = 1024    # Maximum tokens in the response.
+GROQ_TIMEOUT = 30         # Seconds to wait for a response.
 
 # ─── Retrieval ────────────────────────────────────────────────────────────────
 
-# Number of chunks to retrieve per query
 TOP_K_RESULTS = 5
-
-# Minimum similarity distance threshold (ChromaDB uses L2 distance by default;
-# lower = more similar. Chunks with distance > this are considered irrelevant.)
 MAX_DISTANCE_THRESHOLD = 1.8
 
 # ─── Chunking ─────────────────────────────────────────────────────────────────
 
-# Document separator used in the .txt knowledge base files
 DOCUMENT_SEPARATOR = "---"
-
-# Maximum characters per chunk (for any chunks that don't have natural separators)
 MAX_CHUNK_SIZE = 2000
 
 # ─── Prompting ────────────────────────────────────────────────────────────────
@@ -65,7 +56,7 @@ SYSTEM_PROMPT = """You are the RISE chatbot — the AI assistant for the RISE (R
 
 RISE helps city planners identify the highest-impact reuse options for city-owned vacant parcels using real data: foot traffic, flood risk, 311 distress signals, civil rights heritage proximity, and active federal grant windows.
 
-Your job is to answer questions accurately and helpfully using ONLY the context provided below. 
+Your job is to answer questions accurately and helpfully using ONLY the context provided below.
 
 Rules:
 - Answer only from the provided context. Do not invent facts.

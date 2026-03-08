@@ -1,23 +1,27 @@
 # RISE RAG Chatbot
 
-A Retrieval-Augmented Generation chatbot for the RISE (Revitalization Intelligence and Smart Empowerment) system, using ChromaDB for vector storage and free local LLMs via Ollama.
+A Retrieval-Augmented Generation chatbot for the RISE (Revitalization Intelligence and Smart Empowerment) system, using ChromaDB for vector storage and Groq for AI-generated answers.
+
+No local server required. No paid APIs. Runs entirely from the cloud using Groq's free tier.
 
 ## Architecture
 
 ```
 rise_rag/
-├── rise_rag/               # Main package
+├── app/                    # Main package
 │   ├── __init__.py
 │   ├── config.py           # All configuration constants
 │   ├── ingestion.py        # Parse & chunk knowledge base files
 │   ├── embeddings.py       # ChromaDB vector store wrapper
 │   ├── retriever.py        # Similarity search logic
-│   ├── llm.py              # LLM interface (Ollama + fallback)
+│   ├── llm.py              # LLM interface (Groq + fallback)
 │   └── chatbot.py          # Orchestrator — ties everything together
 ├── data/                   # Place your .txt knowledge base files here
 ├── scripts/
 │   └── ingest.py           # One-time ingestion script
-├── chat.py                 # Entry point — run this to chat
+├── chat.py                 # CLI entry point
+├── api.py                  # FastAPI server entry point
+├── .env.example            # Template for your API key
 ├── requirements.txt
 └── README.md
 ```
@@ -27,31 +31,32 @@ rise_rag/
 ### 1. Prerequisites
 
 - Python 3.11+
-- Your virtual environment (`venvRise`) already created
-- [Ollama](https://ollama.com) installed on your machine
+- A free Groq API key (get one at https://console.groq.com — no credit card required)
 
-### 2. Install Ollama and pull a model
+### 2. Activate your venv and install dependencies
 
-```bash
-# Install Ollama from https://ollama.com/download
-# Then pull a lightweight model (choose one):
-
-ollama pull mistral          # ~4GB  — best quality, recommended
-ollama pull llama3.2         # ~2GB  — fast, good quality
-ollama pull phi3             # ~2GB  — very fast, lightweight
-ollama pull gemma2:2b        # ~1.6GB — smallest, still capable
-```
-
-### 3. Activate your venv and install dependencies
-
-```bash
-# In VS Code terminal:
-venvRise\Scripts\activate        # Windows
-# or
-source venvRise/bin/activate     # Mac/Linux
+```powershell
+# Windows (VS Code terminal)
+.venvRise\Scripts\activate
 
 pip install -r requirements.txt
 ```
+
+### 3. Set your Groq API key
+
+Copy `.env.example` to `.env`:
+
+```powershell
+copy .env.example .env
+```
+
+Then open `.env` in VS Code and replace the placeholder with your real key:
+
+```
+GROQ_API_KEY=your_actual_key_here
+```
+
+Your `.env` file is already in `.gitignore` — it will never be pushed to GitHub.
 
 ### 4. Add your knowledge base files
 
@@ -68,37 +73,47 @@ Copy all 9 `.txt` files into the `data/` folder:
 
 ### 5. Ingest the knowledge base (run once)
 
-```bash
+```powershell
 python scripts/ingest.py
 ```
 
-This parses all documents, creates chunks, generates embeddings with `sentence-transformers`, and stores them in a local ChromaDB database.
+This parses all documents, creates chunks, generates embeddings with `sentence-transformers`, and stores them in a local ChromaDB database. Only needs to be run once unless you change the knowledge base files.
 
-### 6. Start chatting
+### 6. Start chatting (CLI)
 
-```bash
+```powershell
 python chat.py
 ```
 
+### 7. Start the API server
+
+```powershell
+uvicorn api:app --reload --port 8000
+```
+
+Then open http://localhost:8000/docs for the interactive API docs.
+
 ## Configuration
 
-Edit `rise_rag/config.py` to change:
-- `OLLAMA_MODEL` — which Ollama model to use
-- `OLLAMA_BASE_URL` — if Ollama runs on a different port
-- `TOP_K_RESULTS` — how many chunks to retrieve per query
+Edit `app/config.py` to change:
+- `GROQ_MODEL` — which model to use (default: `llama-3.3-70b-versatile`)
+- `GROQ_TEMPERATURE` — how creative vs factual the answers are (default: `0.1`)
+- `TOP_K_RESULTS` — how many chunks to retrieve per query (default: `5`)
 - `CHROMA_PERSIST_DIR` — where ChromaDB stores its data
 - `EMBEDDING_MODEL` — which sentence-transformers model to use
 
 ## How it works
 
-1. **Ingestion** (`scripts/ingest.py`): Reads each `.txt` file, splits on the `---` document separators, extracts metadata (PARCEL_ID, TOPIC, document title), and stores chunks in ChromaDB with semantic embeddings.
+1. **Ingestion** (`scripts/ingest.py`): Reads each `.txt` file, splits on `---` separators, extracts metadata (PARCEL_ID, TOPIC, document title), and stores chunks in ChromaDB with semantic embeddings.
 
-2. **Retrieval** (`rise_rag/retriever.py`): For each user query, the top-K most semantically similar chunks are retrieved from ChromaDB.
+2. **Retrieval** (`app/retriever.py`): For each user query, the top-K most semantically similar chunks are retrieved from ChromaDB.
 
-3. **Generation** (`rise_rag/llm.py`): Retrieved chunks are assembled into a context-grounded prompt and sent to Ollama. The LLM is instructed to answer only from the provided context.
+3. **Generation** (`app/llm.py`): Retrieved chunks are assembled into a context-grounded prompt and sent to Groq. The model is instructed to answer only from the provided context.
 
-4. **Fallback**: If Ollama is not running, the chatbot falls back to a context-only mode that surfaces the raw retrieved chunks with a clear message.
+4. **Fallback**: If the Groq API key is missing or unavailable, the chatbot falls back to a context-only mode that surfaces the raw retrieved chunks with a clear message.
 
-## Free LLM note
+## Free tier note
 
-All LLMs run locally via Ollama — no API keys, no cloud costs, no rate limits. The embedding model (`all-MiniLM-L6-v2`) is downloaded once from HuggingFace and cached locally.
+- **Embeddings**: `all-MiniLM-L6-v2` via sentence-transformers — runs locally, downloaded once from HuggingFace, no API key needed.
+- **LLM**: Groq free tier — 14,400 requests/day, 30 requests/minute, no credit card required.
+- **Vector DB**: ChromaDB — runs locally, no cost.
