@@ -1,0 +1,91 @@
+DOCUMENT: RISE Glossary — Key Terms
+PARCEL_ID: general
+TOPIC: glossary
+---
+This document defines key terms used in RISE, the scoring engine, and the data sources. Use this when a question asks "what does X mean" or "what is X".
+
+ArcGIS: A geographic information system (GIS) platform developed by Esri. Montgomery uses ArcGIS to host and serve spatial datasets including parcel boundaries, flood zones, 311 service requests, and most visited locations. RISE queries Montgomery's ArcGIS endpoints directly.
+
+ArcGIS FeatureServer: A specific type of ArcGIS endpoint that serves vector feature data (points, lines, polygons with attributes) and supports spatial queries. RISE uses FeatureServer endpoints for foot traffic and flood risk data.
+
+Anchor point: In RISE, an anchor point is a named location that serves as a reference for scoring parcel proximity. The five RISE anchors are: Rosa Parks Museum, The Legacy Museum, MGMix IX node, Maxwell AFB Gate, and ASU Campus.
+
+Acreage: The size of a parcel in acres. One acre is approximately 43,560 square feet, or roughly the size of an American football field. Parcel A is 8.34 acres (large). Parcel B is 0.33 acres (small). Parcel C is 8.34 acres (large).
+
+Community Grocery Co-op: A member-owned grocery store governed by its community shareholders. Co-ops are a proven model for bringing grocery access to food deserts because profit stays in the community and the store is accountable to its members rather than to outside investors.
+
+CDBG: Community Development Block Grant. HUD's annual formula grant to entitlement communities (cities above a population threshold) for community development activities. Montgomery receives CDBG annually without a competitive application.
+
+EDA: Economic Development Administration. A bureau within the US Department of Commerce that funds economic development projects and workforce training infrastructure. The EDA Tech Hubs programme is an EDA initiative.
+
+FEMA: Federal Emergency Management Agency. FEMA produces the National Flood Hazard Layer (NFHL), which maps flood risk zones across the United States. Montgomery GIS serves FEMA NFHL data through its OneView platform.
+
+FLD_ZONE: The FEMA field name for flood zone designation. Values include AE (high risk), X (low risk), X500 (moderate risk), and others. RISE reads this field from the flood hazard ArcGIS endpoint.
+
+Food desert: A USDA-designated area where low-income residents lack reasonable access to a supermarket. In urban areas, the threshold is more than 500 residents or 33% of a census tract living more than 1 mile from a supermarket, combined with a poverty rate above 20%.
+
+F__of_Visits: The field name in Montgomery's ArcGIS Most Visited Locations dataset that records the total visit count for each named location. RISE uses this field to calculate foot traffic scores.
+
+Gemini 2.5 Pro: Google's large language model used by RISE to generate plain-English land reuse recommendations. RISE sends structured score data to Gemini; Gemini returns three recommendations in JSON format.
+
+GIS: Geographic Information System. Software and data systems that capture, store, analyse, and visualise spatial data. RISE uses Montgomery's GIS infrastructure as its primary data source.
+
+Haversine distance: A mathematical formula for calculating the distance between two points on a sphere (the Earth) given their latitude and longitude coordinates. RISE uses the Haversine formula throughout the scoring engine to compute distances between parcels and anchor points, and between parcels and foot traffic locations.
+
+Heritage boost: A scoring mechanism in RISE that adds 20–25 extra points to the heritage dimension score when a parcel is within 0.5 miles of a civil rights landmark. The Rosa Parks Museum boost is +25 points; The Legacy Museum boost is +20 points.
+
+HRSA: Health Resources and Services Administration. A US federal agency that funds health centres in underserved areas. HRSA's Health Center programme funds Federally Qualified Health Centers (FQHCs), which are eligible for Parcel C's Community Health Clinic recommendation.
+
+ImpValue: Improvement Value. A GIS field in Montgomery's parcel data that records the assessed value of structures on a parcel. A $0 ImpValue indicates vacant land with no buildings.
+
+IX node: Internet Exchange node. A facility where internet service providers and technology companies connect their networks. MGMix is Montgomery's IX node. Proximity to an IX node is a signal for technology industry investment and workforce demand.
+
+Maxwell AFB: Maxwell Air Force Base. A major US Air Force installation in Montgomery, home to Air University, employing approximately 7,500 military and civilian personnel. A key industrial anchor in RISE's scoring model.
+
+MGMix: Montgomery Metropolitan Internet Exchange. Montgomery's IX node, which has attracted data infrastructure investment from AWS, Google, and Meta to the region. A key industrial anchor in RISE's scoring model.
+
+NFHL: National Flood Hazard Layer. FEMA's national geospatial dataset of flood risk zones. Served by Montgomery GIS through the OneView platform.
+
+Nominatim: OpenStreetMap's free reverse geocoding service. RISE used Nominatim to convert parcel coordinates to street addresses during the parcel_finder.py candidate selection phase.
+
+NOFO: Notice of Funding Opportunity. The official federal announcement of a new competitive grant programme or grant cycle. EDA Tech Hubs FY26 NOFO has not yet been released as of March 2026.
+
+Opportunity Zone: A federally designated census tract where private investors can receive tax benefits for investing in qualified businesses or real estate. Created by the 2017 Tax Cuts and Jobs Act. The Parcel C census tract is a designated Opportunity Zone.
+
+Parcel: A legally defined unit of land. In RISE, parcels are city-owned vacant lots identified by a parcel ID number in the Montgomery GIS system.
+
+RISE: Revitalization Intelligence and Smart Empowerment. The name of this tool.
+
+RISE score: The final weighted composite score for a parcel, 0–100. Computed from 8 dimension scores with weights: Heritage 25%, Industrial 20%, Activity 15%, Proximity 10%, Economic 10%, Vacancy 10%, Flood 5%, 311 5%.
+
+SFHA: Special Flood Hazard Area. A FEMA designation for areas with a 1% or greater annual chance of flooding (the 100-year floodplain). Parcels within an SFHA face mandatory flood insurance requirements and higher development costs.
+
+311: Montgomery's non-emergency municipal service request line. Residents call 311 to report neighbourhood issues including overgrown grass, illegal dumping, potholes, and vacant building concerns.
+
+USDA: United States Department of Agriculture. Through its Rural Development division, USDA administers the Rural Economic Development and Value Added Producer Grant programmes relevant to RISE.
+
+VAPG: Value Added Producer Grant. A USDA programme funding planning and working capital for projects that add value to agricultural products or create new food access infrastructure. The VAPG window closes April 15, 2026.
+
+Zone X: FEMA flood zone designation for areas of minimal flood risk — outside the 100-year and 500-year floodplains. All three hero parcels fall in Zone X. Zone X parcels have no flood-specific building requirements.
+
+---
+DOCUMENT: RISE Chatbot — Out of Scope Responses
+PARCEL_ID: general
+TOPIC: out_of_scope
+---
+The RISE chatbot is designed to answer questions about the three hero parcels, the scoring engine, the data sources, the active grants, and Montgomery's community context. For questions outside this scope, use the following response patterns:
+
+If asked about other Montgomery parcels not in the demo:
+"RISE currently analyses three hero parcels selected for the hackathon demo. In a full deployment, the same scoring model would run on all 200-plus city-owned vacant parcels in Montgomery. I can tell you how the scoring model works and what data it uses, which would apply to any parcel."
+
+If asked for legal or financial advice about grants:
+"RISE identifies grant opportunities and explains eligibility criteria based on Grants.gov data, but I am not a legal or financial advisor. For official grant application guidance, contact the USDA Rural Development Alabama state office in Montgomery directly. They manage both the Rural Economic Development and VAPG programmes."
+
+If asked about parcels in other cities:
+"RISE was built specifically for Montgomery, Alabama, using Montgomery's GIS data, flood hazard data, 311 service request data, and civil rights heritage context. The scoring model could be adapted for other cities with similar public GIS infrastructure, but that is outside the scope of this demo."
+
+If asked about real estate valuation or market prices:
+"RISE does not measure market value — it measures community impact potential. The scores reflect proximity to anchors, foot traffic, flood risk, and community need, not assessed land value or market comparables. For property valuation, the Montgomery County Revenue Commissioner's office maintains assessed values."
+
+If asked about current events, news, or information not in the knowledge base:
+"That is outside what I have in my knowledge base. I can answer questions about the three RISE hero parcels, the scoring model, the data sources (ArcGIS, FEMA flood hazard, Montgomery 311, Grants.gov, Gemini AI), and the active grant windows. What would you like to know about any of those?"

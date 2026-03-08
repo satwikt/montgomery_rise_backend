@@ -1,0 +1,84 @@
+DOCUMENT: Parcel B — Smart Infrastructure Story
+PARCEL_ID: B
+TOPIC: parcel_overview
+---
+Parcel B is a city-owned vacant parcel located at 643 Kimball Street, Montgomery, Alabama, ZIP code 36108. The parcel ID is 11 05 15 1 010 022.000. It is owned by the City of Montgomery. The parcel is 0.33 acres in size. Its coordinates are 32.3684 latitude, -86.3439 longitude. The improvement value is $0, confirming it is vacant and undeveloped. The zone context is IX Hub, also called Smart Infrastructure. RISE classifies this as the Smart Infrastructure parcel because of its proximity to Maxwell AFB and the MGMix Internet Exchange node.
+
+---
+DOCUMENT: Parcel B — Anchor Proximity
+PARCEL_ID: B
+TOPIC: anchor_proximity
+---
+Parcel B is 0.891 miles from Maxwell AFB Gate, which is its nearest anchor. Maxwell Air Force Base is a major federal military installation that employs thousands of civilian and military personnel in Montgomery. The Maxwell AFB Gate boost radius is 1.0 miles, and at 0.891 miles, Parcel B falls within this radius. MGMix, Montgomery's Internet Exchange node, is approximately 1.8 miles from Parcel B — outside the 1.0-mile boost radius. Alabama State University is approximately 2.2 miles away. The Rosa Parks Museum and Legacy Museum are approximately 1.9 and 2.0 miles away respectively. Parcel B is in the Kimball Street corridor, which runs between the west side residential area and the Maxwell AFB approach zone.
+
+---
+DOCUMENT: Parcel B — RISE Scores
+PARCEL_ID: B
+TOPIC: scores
+---
+Parcel B RISE scoring breakdown across all 8 dimensions:
+
+Heritage score: 5 out of 100. This parcel is approximately 1.9 miles from the Rosa Parks Museum, well outside the 0.5-mile and even 1.0-mile boost radius. No heritage boost fires. Score is set to the minimum of 5.
+
+Industrial score: 22 out of 100. Maxwell AFB Gate is 0.891 miles away — within the 1.0-mile federal military anchor boost radius. The industrial boost from Maxwell AFB is +15 points. However, because the parcel is near the outer edge of the radius, the proximity multiplier reduces the final score. Score formula: 15 + 70 × (1 - 0.891/1.0) = approximately 22.
+
+Activity score: 31 out of 100. ArcGIS foot traffic within 1 mile of this parcel shows primarily institutional movement — Maxwell AFB Visitor Center at 5,200 visits, Air Force Officer Training at 4,100 visits. Foot traffic is consistent on weekdays, low on weekends, characteristic of a government and military workforce zone rather than a community activity hub.
+
+Proximity score: 55 out of 100. Calculated as 100 × (1 - 0.891/2.0). Moderate proximity to its nearest anchor.
+
+Economic score: 26 out of 100. The parcel is 0.33 acres, which is smaller than the 1.0–10.0 acre ideal range for industrial and workforce zone uses. A training hub or co-working facility requires more space. The small lot size is the primary limiting factor for this parcel.
+
+Vacancy score: 70 out of 100. Improvement value is $0, indicating vacant land. Scored at the standard 90-point vacant level, reduced for small acreage uncertainty.
+
+Flood risk score: 5 out of 5. Falls in FEMA Zone X — minimal flood risk.
+
+311 distress score: 7 out of 10. Higher distress density in this corridor — approximately 25 calls per square mile in the last 90 days. Complaint types include overgrown vegetation and infrastructure maintenance on vacant lots, indicating neglected city-owned land.
+
+Final RISE score: 29 out of 100. This is the lowest of the three hero parcels. The low final score reflects the small acreage and the parcel's distance from its nearest high-value anchor. However, the IX hub story — proximity to Maxwell AFB and the broader workforce development opportunity — is a PITCH story, not a scoring story. The score reflects current data; the recommendation reflects strategic opportunity.
+Score weights: Heritage 25%, Industrial 20%, Activity 15%, Proximity 10%, Economic 10%, Vacancy 10%, Flood 5%, 311 5%.
+Urgency flag: low based on score, but grant urgency is medium — USDA Rural Dev Q3 closes in 26 days.
+
+---
+DOCUMENT: Parcel B — AI Recommendations
+PARCEL_ID: B
+TOPIC: recommendations
+---
+RISE recommends the following top 3 land reuse options for Parcel B:
+
+Recommendation 1: AI Workforce Training Hub. Fit score: 22 out of 100. Cost tier: Mid-Term $500K–$5M. Proximity to Maxwell AFB at 0.891 miles makes this parcel a candidate for a workforce development centre serving the growing technology corridor. Maxwell AFB employs 7,500 military and civilian personnel. Veterans transitioning out of service need technology skills training. AWS, Google, and Meta have moved data infrastructure into Montgomery, creating demand for locally trained tech workers. The ArcGIS foot traffic pattern — high weekday, low weekend, morning peak — confirms institutional workforce movement in this corridor. The small parcel size (0.33 acres) limits buildout but supports a focused training centre model. Grant: USDA Rural Economic Development Q3, open, 26 days remaining, covers 70% of costs with 20% match.
+
+Recommendation 2: Defence Tech Co-Working Campus. Fit score: 12 out of 100. Cost tier: Mid-Term $500K–$5M. A secure co-working facility for defence contractors and veteran-owned startups. IX proximity 1.8 miles away provides competitive bandwidth advantage for data-intensive defence applications. Small parcel is well-suited to a boutique co-working model of 20–30 desks. Grant: Monitor EDA Tech Hubs FY26 NOFO — the FY25 Stage II window closed February 18 2026, but the next cycle is expected.
+
+Recommendation 3: Veteran Small Business Incubator. Fit score: 55 out of 100 on proximity. Cost tier: Quick Win under $500K. Maxwell AFB transition population creates natural demand. Veteran entrepreneurs represent a high-value economic development target. Low-cost buildout — small parcel, light renovation — with high community impact. Grant: SBA Boots to Business programme eligible.
+
+One-line summary: Industrial-priority parcel — 0.891 miles from Maxwell AFB Gate. Workforce and tech reuse scores highest. The IX node story is the pitch.
+
+---
+DOCUMENT: Parcel B — Grants
+PARCEL_ID: B
+TOPIC: grants
+---
+Parcel B has one open grant window and one closed window to monitor:
+
+Grant 1: USDA Rural Economic Development Q3. Status: OPEN. Deadline: March 31, 2026 — 26 days remaining. Eligibility: covers up to 70% of total project costs. Match requirement: 20%. Example: on a $500,000 training facility, USDA covers $350,000 and the city contributes $150,000. The 36108 ZIP code median income qualifies for this coverage tier.
+
+Grant 2: EDA Tech Hubs FY25 Stage II. Status: CLOSED. Deadline passed: February 18, 2026 — closed 15 days ago. Action: monitor for FY26 NOFO announcement. The Economic Development Administration Tech Hubs programme is specifically designed for regions building technology workforce capacity around federal infrastructure like military bases and internet exchange nodes. Montgomery was positioned well for this grant. The next cycle is the key opportunity.
+
+The USDA Rural Economic Development Q3 is the only active window. At 26 days, the team should flag this to the city planning office immediately.
+
+---
+DOCUMENT: Parcel B — Health and Workforce Context
+PARCEL_ID: B
+TOPIC: health_context
+---
+The community surrounding Parcel B has the following workforce and economic indicators:
+
+Unemployment rate: 11.2% in the IX hub corridor, more than double the national average of approximately 4.1%.
+
+Workforce in technology: Only 4.1% of the local workforce is employed in technology-related roles, compared to a national average of approximately 6%. This gap is the opportunity — RISE identifies this parcel as a place to close it.
+
+Veterans in workforce: 18% of working-age adults in this area are veterans or active military, reflecting the Maxwell AFB influence. Veterans represent a high-potential workforce for technology and defence contracting roles.
+
+The 36108 ZIP code covers the west Montgomery residential area south of Maxwell AFB. This neighbourhood has seen disinvestment as the economy has shifted away from traditional manufacturing. The Maxwell AFB mission brings consistent federal spending and workforce movement to the corridor, but that economic activity has not translated into local job creation. A workforce training facility here directly addresses the gap between the federal employment anchor and the local skill base.
+
+What is MGMix? MGMix is the Montgomery Internet Exchange, a network interconnection facility that allows internet service providers and content networks to exchange traffic locally rather than routing through Atlanta or Birmingham. When AWS, Google, and Meta build data infrastructure near an IX node, they need a locally trained workforce for operations, security, and maintenance. RISE identifies parcels near MGMix as high-priority for technology workforce development.

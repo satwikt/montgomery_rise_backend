@@ -1,0 +1,105 @@
+DOCUMENT: Active Grants — Full Detail
+PARCEL_ID: general
+TOPIC: grants_overview
+---
+RISE tracks grant programmes relevant to community development, food access, workforce development, and infrastructure on city-owned vacant land. As of March 2026, two competitive grant windows are open, one is a formula entitlement, and one closed recently. All figures are verified from Grants.gov and programme documentation.
+
+---
+DOCUMENT: Grant — USDA Rural Economic Development Q3
+PARCEL_ID: general
+TOPIC: grant_usda_red
+---
+Grant name: USDA Rural Economic Development Loan and Grant Programme, Q3 2026 cycle.
+Status: OPEN as of March 2026.
+Deadline: March 31, 2026. That is 26 days from the current date of March 6, 2026. This is the most urgent grant window in the RISE portfolio.
+Administering agency: United States Department of Agriculture, Rural Development division.
+
+What it funds: Economic development projects in rural and low-income communities. Eligible uses include community facilities, grocery and food access infrastructure, workforce training facilities, broadband infrastructure, and small business development.
+
+Coverage amount: Up to 70% of total eligible project costs for most applicants. For communities with median household income below $25,000 — which includes the Parcel C zone with median income of $22,400 — coverage increases to 75%.
+
+Match requirement: Applicant must cover the remaining 20–25% of project costs. This can come from city general funds, other grants, private donations, or Opportunity Zone investment.
+
+Cost examples by parcel:
+- Parcel A (Heritage): $500,000 project at 70% coverage — USDA covers $350,000, city contributes $150,000.
+- Parcel B (IX Hub): $500,000 training facility at 70% coverage — USDA covers $350,000, city contributes $150,000.
+- Parcel C (Food Desert): $500,000 grocery co-op at 75% coverage — USDA covers $375,000, city contributes $125,000. A $1,000,000 project: USDA covers $750,000, city contributes $250,000.
+
+Why this grant is important: This is the highest-coverage federal grant available to Montgomery for community development on city-owned land right now. The 26-day deadline means the city planning office needs to begin application preparation immediately.
+
+Eligible applicants: Local governments, non-profit organisations, federally recognised tribes. The City of Montgomery is a direct eligible applicant.
+
+Application process: Applications are submitted through Grants.gov and the USDA Rural Development state office. Alabama's USDA Rural Development state office is in Montgomery — the city has a direct relationship with the programme officers.
+
+---
+DOCUMENT: Grant — USDA Value Added Producer Grant
+PARCEL_ID: general
+TOPIC: grant_usda_vapg
+---
+Grant name: USDA Value Added Producer Grant (VAPG).
+Status: OPEN as of March 2026.
+Deadline: April 15, 2026. That is 41 days from March 6, 2026.
+Administering agency: USDA Rural Development.
+
+What it funds: Planning and working capital grants for projects that add value to agricultural products or create new market opportunities for producers. In the context of food desert intervention, this funds community food production, processing, and distribution infrastructure — including urban farms, community market build-outs, and food co-op feasibility planning.
+
+Coverage amount: Up to 50% of total eligible project costs.
+Match requirement: 1:1. For every dollar of USDA funding, the applicant must contribute one dollar.
+
+Cost example: A $300,000 urban farm and market build-out on Parcel C — USDA covers $150,000, community partner or Opportunity Zone investor covers $150,000.
+
+Best fit: VAPG is best suited to Parcel C's Urban Farm and Market recommendation (Recommendation 3) and could support Parcel A's Community Cultural Centre and Vendor Market (Recommendation 2) if a food component is included in the programming.
+
+Why 41 days matters: VAPG closes 15 days after the USDA Rural Economic Development Q3 deadline. If the city pursues both, the team needs to prepare two separate applications on an overlapping timeline. RISE flags this as high-urgency planning work.
+
+---
+DOCUMENT: Grant — HUD Community Development Block Grant
+PARCEL_ID: general
+TOPIC: grant_hud_cdbg
+---
+Grant name: HUD Community Development Block Grant (CDBG).
+Status: Formula entitlement — Montgomery receives this funding annually without a competitive application.
+Deadline: No competitive deadline. Annual allocation. Montgomery's programme year runs on the city's fiscal calendar.
+Administering agency: US Department of Housing and Urban Development.
+
+What it is: CDBG is one of the longest-running federal community development programmes. Congress appropriates a national pool of funds each year, and HUD distributes it to entitlement communities — cities and counties above a population threshold — based on a formula that accounts for population, poverty, and housing overcrowding. Montgomery qualifies as an entitlement community and receives its allocation automatically.
+
+What it funds: Community development activities that benefit low- and moderate-income residents. Eligible uses include: acquisition of real property, rehabilitation of residential and non-residential structures, construction of public facilities (including grocery stores, clinics, and community centres), removal of architectural barriers, and economic development activities. All three hero parcel development types are eligible uses.
+
+Montgomery's typical annual allocation: Approximately $2–3 million per year, based on historical HUD entitlement data.
+
+How RISE connects to CDBG: Because Montgomery receives CDBG funds annually, any of the three hero parcel developments could be partially funded with CDBG money in addition to the competitive USDA grants. CDBG can cover acquisition, site preparation, and construction costs. Using CDBG as a match for the USDA Rural Economic Development grant could further reduce the city's out-of-pocket contribution.
+
+---
+DOCUMENT: Grant — EDA Tech Hubs (Closed, Monitor FY26)
+PARCEL_ID: general
+TOPIC: grant_eda_tech_hubs
+---
+Grant name: EDA Tech Hubs Programme, FY25 Stage II.
+Status: CLOSED. Deadline was February 18, 2026 — this deadline passed 15 days ago as of March 6, 2026.
+Administering agency: US Economic Development Administration.
+
+What it funded: Large-scale grants ($15M–$75M) for designated Tech Hub regions to build technology industry clusters. Stage II was for regions already designated as Tech Hubs in Stage I to receive implementation funding for workforce development, research infrastructure, and business ecosystems.
+
+Why it matters for Montgomery: Montgomery and the surrounding region were positioned for this grant because of Maxwell AFB, MGMix, and Alabama State University's technology programmes. The combination of federal military technology missions, IX infrastructure, and an HBCU creates the kind of ecosystem the Tech Hubs programme targets.
+
+Current status: Stage II is closed. The next opportunity is the FY26 NOFO (Notice of Funding Opportunity), which has not yet been announced. RISE recommends monitoring the EDA website and pre-positioning Montgomery's application by building the workforce training infrastructure now — even at smaller scale through USDA Rural Economic Development funding — so that the region has demonstrable activity when FY26 opens.
+
+Action for the city: Subscribe to EDA email updates at eda.gov. Engage the Alabama Department of Commerce, which coordinates federal grant applications for regional technology initiatives.
+
+---
+DOCUMENT: Grant — Opportunity Zone Tax Incentive
+PARCEL_ID: general
+TOPIC: opportunity_zone
+---
+Programme name: Opportunity Zones (Qualified Opportunity Zone, QOZ).
+Type: Federal tax incentive programme, not a direct grant. No application deadline.
+Administering agency: US Treasury / IRS.
+
+What it is: Opportunity Zones were created by the 2017 Tax Cuts and Jobs Act. Census tracts with high poverty rates were designated as QOZs. Private investors who place capital gains into a Qualified Opportunity Fund (QOF) can defer and reduce their capital gains tax liability if the fund invests in businesses or real estate in a QOZ.
+
+Relevance to RISE: The census tract containing Parcel C is a federally designated Opportunity Zone. This means that private investors — real estate developers, impact investors, community development finance institutions — can receive significant tax benefits for investing in development on this parcel. This is a mechanism to attract private equity to the community grocery co-op or urban farm development without requiring the full match to come from public funds.
+
+How it reduces the city's burden: If an Opportunity Zone fund provides $125,000 of equity investment in the Parcel C grocery co-op, the city does not need to find that $125,000 from general fund appropriations. The investor receives tax benefits; the community receives the grocery store.
+
+Parcel C and Opportunity Zone: Parcel C qualifies. Parcels A and B may also fall within QOZ-designated tracts — verification against IRS QOZ census tract list recommended before finalising funding strategy.

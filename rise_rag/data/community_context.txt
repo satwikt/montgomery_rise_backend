@@ -1,0 +1,83 @@
+DOCUMENT: Montgomery Alabama — Community and Economic Context
+PARCEL_ID: general
+TOPIC: community_overview
+---
+Montgomery is the capital city of Alabama with a population of approximately 200,000. It is the birthplace of the American civil rights movement — Rosa Parks refused to give up her bus seat here on December 1, 1955, and the Montgomery Bus Boycott that followed became a turning point in US history. The city owns more than 200 vacant parcels across its footprint, many of them concentrated in historically underinvested neighbourhoods on the west and south sides. RISE was built to help the City of Montgomery convert this idle public asset into community opportunity, guided by data rather than speculation.
+
+---
+DOCUMENT: Montgomery — Civil Rights Heritage Economy
+PARCEL_ID: general
+TOPIC: heritage_economy
+---
+Montgomery's civil rights heritage is a growing economic driver, not only a historical fact.
+
+Key landmarks and their significance:
+- Rosa Parks Museum, 252 Montgomery Street. Operated by Troy University. Commemorates Rosa Parks' arrest and the Montgomery Bus Boycott. Receives approximately 8,420 documented visits annually tracked in the city's Most Visited Locations dataset. Open to the public, nationally recognised.
+- The Legacy Museum, 115 Coosa Street. Operated by the Equal Justice Initiative (EJI). Documents the history of slavery, racial terror, and mass incarceration in America. Receives approximately 6,250 documented visits. The EJI, founded by Bryan Stevenson, has invested over $50 million in Montgomery's heritage corridor.
+- Civil Rights Memorial Center, 400 Washington Avenue. Operated by the Southern Poverty Law Center. Receives approximately 5,100 documented visits. Features the Civil Rights Memorial designed by Maya Lin.
+- Dexter Avenue King Memorial Baptist Church, 454 Dexter Avenue. Where Martin Luther King Jr. pastored during the Bus Boycott. A National Historic Landmark.
+- First White House of the Confederacy, 644 Washington Avenue. Receives approximately 3,800 visits annually.
+
+Heritage tourism pattern: Foot traffic data from ArcGIS shows that the heritage corridor is active on weekends, with Saturday and Sunday peaks. Visitors travel from across the country and internationally. A vacant parcel within 0.5 miles of these landmarks is not in a low-demand area — it is in the middle of a growing destination zone that lacks supporting amenities like community plazas, local vendor markets, and cultural gathering spaces.
+
+EJI's ongoing investment: The Equal Justice Initiative's National Memorial for Peace and Justice (the lynching memorial) opened in 2018 and has drawn over 500,000 visitors. EJI's investment has transformed downtown Montgomery's heritage economy and is expected to grow further as additional EJI facilities open. Parcels near the EJI corridor have rising, not declining, development potential.
+
+---
+DOCUMENT: Montgomery — Food Desert Crisis
+PARCEL_ID: general
+TOPIC: food_desert_context
+---
+What is a food desert? The USDA Economic Research Service defines a food desert as a low-income census tract where a substantial number of residents have low access to a supermarket or large grocery store. In urban areas, the threshold is: more than 500 residents or 33% of the census tract population live more than 1 mile from a supermarket.
+
+Montgomery's food desert situation: Multiple census tracts in west and central Montgomery meet both the low-income and low-access criteria. The area surrounding Parcel C is formally designated by the USDA as a food desert.
+
+Key statistics for the Parcel C zone:
+- Nearest grocery store: 2.8 miles from Parcel C. Without a car, this is unreachable for routine grocery shopping.
+- Population affected: approximately 6,200 residents within 1 mile of Parcel C without grocery access.
+- Food insecurity rate: 41% of residents experience food insecurity. For children specifically, rates are higher.
+- Median household income: $22,400 — 37% below the Montgomery metro median.
+
+Health consequences of food deserts: Food deserts are not just inconvenient. Chronic lack of access to fresh produce is linked to higher rates of diabetes, hypertension, obesity, and cardiovascular disease. The asthma rate in this zone — 2.4 times the city average — is also connected to the physical environment: vacant lots with overgrown vegetation and debris create air quality and allergen problems.
+
+theM Transit and grocery access: Montgomery's public transit system, theM, provides bus service across the city, but service frequency and routing in west and central Montgomery does not provide practical access to grocery stores on a schedule compatible with regular food shopping. Most routes run every 60 minutes, making a round-trip grocery trip a 3–4 hour commitment without a car.
+
+What a community grocery co-op is: A community grocery co-op is a member-owned grocery store where community residents are shareholders. Co-ops are a proven model for bringing grocery access to food deserts because they are community-accountable — profit stays in the neighbourhood, and the store is governed by its members. Examples: Seward Community Co-op in Minneapolis, New Roots Co-op in St. Louis.
+
+---
+DOCUMENT: Montgomery — MGMix and Technology Economy
+PARCEL_ID: general
+TOPIC: tech_economy
+---
+What is an Internet Exchange (IX)? An Internet Exchange Point (IXP) is a physical location where multiple internet service providers (ISPs), content delivery networks, and large technology companies connect their networks directly to each other. This local interconnection is faster and cheaper than routing traffic through distant hubs. For a city to have its own IX node means that data generated and consumed locally does not have to travel to Atlanta or Birmingham to be processed.
+
+MGMix: MGMix (Montgomery Metropolitan Internet Exchange) is Montgomery's IX node. Its presence is a key piece of digital infrastructure that has attracted data centre investment from major technology companies to the Montgomery metro area. AWS, Google, and Meta have all built infrastructure in the region in part because of IX connectivity.
+
+Why MGMix matters for RISE: When a large technology company builds data infrastructure near an IX node, it creates local demand for:
+- Network operations centre (NOC) technicians
+- Cybersecurity analysts
+- IT support and systems administration
+- Data centre infrastructure maintenance
+
+These are jobs that pay $45,000–$85,000 per year and do not require a four-year degree. They require 6–18 months of technical training. A workforce training facility within 1 mile of MGMix can pipeline locally trained workers directly into these roles.
+
+The technology workforce gap: Currently, only 4.1% of the Montgomery local workforce is employed in technology roles, compared to a national average of approximately 6%. The IX node and associated data infrastructure investment means that technology job demand in Montgomery will grow. RISE identifies Parcels B and C — both near MGMix — as sites where workforce training investment can close this gap.
+
+Maxwell AFB and the technology workforce: Maxwell Air Force Base is home to Air University, the US Air Force's professional military education institution. Veterans transitioning out of Maxwell have technical skills — avionics, communications, intelligence systems — that are directly transferable to civilian technology roles with 6–12 months of bridging training. The 0.891-mile proximity of Parcel B to Maxwell AFB is a direct connection to this veteran workforce pipeline.
+
+---
+DOCUMENT: Montgomery — Vacant Land as Public Asset
+PARCEL_ID: general
+TOPIC: vacant_land
+---
+Why Montgomery has so many vacant city-owned parcels: Montgomery, like many mid-sized American cities, accumulated vacant land through tax foreclosures, urban renewal demolitions, and the departure of industrial and commercial tenants over the past 40 years. When property owners fail to pay taxes, the city eventually acquires the land. When old industrial sites were demolished and redevelopment did not materialise, city-owned lots remained. Today, the City of Montgomery owns more than 200 such parcels across the city.
+
+The cost of inaction: Vacant city-owned land is not free to hold. Costs include:
+- Annual maintenance: mowing, debris removal, nuisance abatement — typically $800–$2,000 per lot per year
+- 311 service request processing: each complaint costs city staff time
+- Foregone property tax revenue: a developed parcel generates tax revenue; a vacant one generates none
+- Community health impact: vacant lots are linked to higher crime rates and worse health outcomes in surrounding blocks
+- Opportunity cost: land that could house a grocery, health clinic, or training facility is instead generating zero community value
+
+The RISE argument: The question is not whether to develop these parcels — inaction has a cost. The question is what to develop, based on data. RISE was built to answer that question systematically. By combining real foot traffic, flood risk, 311 distress signals, heritage proximity, and active grant windows, RISE gives planners a defensible, data-grounded recommendation for each parcel.
+
+The three hero parcels: RISE selected the three hero parcels through a GIS-based candidate screening process (parcel_finder.py) that ranked all city-owned parcels by proximity to the five anchor points. The three selected are the highest-opportunity parcels in the Montgomery portfolio for the hackathon demonstration. In a full deployment, RISE would score and rank all 200+ parcels on the same 8-dimension model.
