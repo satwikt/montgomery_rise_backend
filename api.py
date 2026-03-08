@@ -67,6 +67,8 @@ from rise_selector_v3 import (
     calculate_distance,
     compute_score,
     get_foot_traffic,
+    get_grant_data,
+    merge_grants,
 )
 
 # ── RAG chatbot ───────────────────────────────────────────────────────────────
@@ -334,6 +336,10 @@ def _run_pipeline(parcel: dict[str, Any]) -> dict[str, Any]:
 
     # Deep-copy so we never mutate the in-memory HERO_PARCELS list.
     p = copy.deepcopy(parcel)
+
+    # Merge static grant flags with live grants.gov results
+    live_grant_data = get_grant_data()
+    p["grant_flags"] = merge_grants(p.get("grant_flags", []), live_grant_data.get("grants", []))
 
     foot_traffic: dict[str, Any] = get_foot_traffic(p)
     scores: dict[str, Any] = compute_score(p, foot_traffic)

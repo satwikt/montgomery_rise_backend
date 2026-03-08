@@ -32,6 +32,9 @@ import time
 import os
 from datetime import datetime
 import sys
+from datetime import datetime
+
+
 sys.stdout.reconfigure(encoding='utf-8')
 # ═══════════════════════════════════════════════════════════════════
 # CONFIG
@@ -828,7 +831,92 @@ def compute_score(parcel: dict, foot_traffic: dict) -> dict:
         "zone_context":       parcel.get("zone_context", ""),  # passed through for AI routing
     }
 
+# ═══════════════════════════════════════════════════════════════════
+# Grants Bright Data Function
+# ═══════════════════════════════════════════════════════════════════
+BRIGHT_DATA_KEY = os.environ.get("BRIGHT_DATA_KEY", "")
+def _days_remaining(close_date_str: str) -> int | None:
+    try:
+        close = datetime.strptime(close_date_str, "%m/%d/%Y")
+        return max(0, (close - datetime.now()).days)
+    except Exception:
+        return None
+def get_grant_data(keyword="USDA Rural Economic Development"):
+    try:
+        response = requests.post(
+            "https://api.grants.gov/v1/api/search2",
+            headers={"Content-Type": "application/json"},
+            json={
+                "keyword": keyword,
+                "oppStatuses": "posted",
+                "rows": 10,
+                "sortBy": "openDate|desc"
+            },
+            timeout=5
+        )
+        response.raise_for_status()
+        data = response.json()
 
+        inner = data.get("data", {})
+        hits = inner.get("oppHits", [])
+        hit_count = inner.get("hitCount", 0)
+
+        grants = []
+        for opp in hits:
+            grants.append({
+                "name":           opp.get("title"),
+    "status":         "open",
+    "days_remaining": _days_remaining(opp.get("closeDate", "")),
+    "opportunity_id": opp.get("number"),
+    "agency":         opp.get("agency"),
+    "open_date":      opp.get("openDate"),
+    "close_date":     opp.get("closeDate"),
+    "cfda":           opp.get("cfdaList", []),
+    "source":         "grants.gov API"
+            })
+
+        print(f"  [GRANTS] ✅ {len(grants)} of {hit_count} open grants found")
+        return {"grants": grants, "source": "grants.gov_api"}
+
+    except Exception as e:
+        print(f"  [GRANTS] ⚠️ grants.gov API failed ({e}) — using static fallback")
+        return {
+            "grants": [
+                {"name": "USDA Rural Economic Development Q3",
+                 "status": "open", "days_remaining": 23, "source": "static_fallback"},
+                {"name": "USDA Value Added Producer Grant",
+                 "status": "open", "days_remaining": 38, "source": "static_fallback"},
+            ],
+            "source": "static_fallback"
+        }
+   
+   
+def merge_grants(static_grants: list, live_grants: list) -> list:
+    """
+    Merge static parcel grant flags with live grants.gov results.
+    Deduplicates by name so nothing appears twice.
+    """
+    merged = list(static_grants)
+    existing_names = {g["name"].lower() for g in merged if g.get("name")}
+
+    for grant in live_grants:
+        name = grant.get("name", "")
+        if name and name.lower() not in existing_names:
+            merged.append({
+                "name":           name,
+                "status":         "open",
+                "days_remaining": grant.get("days_remaining"),
+                "opportunity_id": grant.get("opportunity_id"),
+                "agency":         grant.get("agency"),
+                "close_date":     grant.get("close_date"),
+                "source":         grant.get("source", "grants.gov API"),
+            })
+            existing_names.add(name.lower())
+
+    # Sort: soonest closing first
+    merged.sort(key=lambda g: g.get("days_remaining") or 999)
+    return merged 
+    
 # ═══════════════════════════════════════════════════════════════════
 # 6. AI ANALYSIS — Gemini 2.5 Pro
 # ═══════════════════════════════════════════════════════════════════
@@ -845,8 +933,10 @@ def build_ai_prompt(parcel: dict, foot_traffic: dict) -> str:
     grants    = parcel.get("grant_flags", [])
     open_grants = [g for g in grants if g.get("status") == "open"]
     grant_str = "; ".join(
-        f"{g['name']} (open, {g['days_remaining']} days, covers {g['eligibility_pct']}%)"
-        for g in open_grants
+    f"{g['name']} (open, {g.get('days_remaining', '?')} days"
+    + (f", covers {g['eligibility_pct']}%" if g.get('eligibility_pct') else "")
+    + ")"
+    for g in open_grants
     ) or "None identified"
 
     health    = parcel.get("health_flags", {})
