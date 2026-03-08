@@ -539,7 +539,7 @@ Cost: ~$0.004 total for 3 parcels (well within free tier: 500 req/day)
 2. Create a new **Web Service** on [render.com](https://render.com)
 3. Set the build command: `pip install -r requirements.txt`
 4. Set the start command: `uvicorn api:app --host 0.0.0.0 --port $PORT`
-5. Add environment variable: `GEMINI_API_KEY=your_key_here`
+5. Add environment variable: `GEMINI_API_KEY=your_key_here...`
 6. Update the API URL field in `demo_3.html` (or the UI bar) to your Render URL
 
 ### Railway
@@ -588,6 +588,8 @@ Every live API call has a silent pre-written fallback — the demo never crashes
 
 # Required
 GEMINI_API_KEY=your_gemini_key_here
+GROQ_API_KEY=your_groq_key_here
+BRIGHT_DATA_KEY=your_bright_data_key_here
 
 # All other APIs are free public endpoints — no key needed
 # ArcGIS foot traffic, flood risk, 311 distress, Grants.gov
