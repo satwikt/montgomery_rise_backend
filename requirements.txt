@@ -1,28 +1,24 @@
-# Montgomery RISE — Python Dependencies
+# Montgomery RISE v4.0.0 — Python dependencies
 # Install: pip install -r requirements.txt
 
-# ── Core HTTP client ──────────────────────────────────────────────
-requests==2.32.3          # ArcGIS + Gemini + Nominatim API calls
-# Montgomery RISE — Python dependencies
+# ── API framework ─────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
 
-# API server
-fastapi
-uvicorn[standard]
-python-dotenv
+# ── HTTP client — ArcGIS, Gemini 2.5 Pro, 311, Nominatim ─────────
+requests>=2.31.0
 
-# Pydantic is installed automatically with FastAPI (v2.x)
-# ── Future backend (FastAPI) ──────────────────────────────────────
-# Uncomment when wiring up the API server:
-# fastapi==0.115.6
-# uvicorn[standard]==0.32.1
-# python-dotenv==1.0.1    # load GEMINI_API_KEY from .env file
+# ── RAG: vector store ─────────────────────────────────────────────
+chromadb>=0.5.0
 
-# ── Future RAG pipeline (Jolie) ───────────────────────────────────
-# Uncomment when building the vector store:
-# chromadb==0.5.23
-# sentence-transformers==3.3.1
-# langchain==0.3.13
-# langchain-community==0.3.13
+# ── RAG: local embeddings (all-MiniLM-L6-v2, ~80 MB, no API key) ─
+sentence-transformers>=3.0.0
 
-# ── All other imports in this project are Python stdlib ───────────
-# json, math, os, time, urllib.parse, datetime, collections — no install needed
+# ── RAG: LLM via Groq free tier (llama-3.3-70b-versatile) ────────
+# Get your free key at: https://console.groq.com
+groq>=0.9.0
+
+# ── Optional: rich terminal output for CLI ingestion script ───────
+rich>=13.0.0

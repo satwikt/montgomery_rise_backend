@@ -1,73 +1,107 @@
 """
-config.py — All RISE RAG configuration constants.
-Edit this file to change models, paths, and tuning parameters.
+config.py — Centralised configuration for the RISE RAG subsystem.
+
+All tuneable parameters live here.  Import constants from this module;
+never hard-code values in other modules.
 """
 
-from pathlib import Path
+from __future__ import annotations
+
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
 
-# Load GROQ_API_KEY from .env file if present
 load_dotenv()
 
-# ─── Paths ────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# Paths
+# ─────────────────────────────────────────────────────────────────────────────
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
-CHROMA_PERSIST_DIR = PROJECT_ROOT / "chroma_db"
-CHROMA_COLLECTION = "rise_knowledge"
+# rise_rag/app/config.py  →  rise_rag/app/  →  rise_rag/  →  project root
+_APP_DIR: Path = Path(__file__).resolve().parent
+RAG_ROOT: Path = _APP_DIR.parent           # rise_rag/
+PROJECT_ROOT: Path = RAG_ROOT.parent       # repo root (where api.py lives)
 
-# ─── Embedding Model ──────────────────────────────────────────────────────────
+DATA_DIR: Path = RAG_ROOT / "data"
+CHROMA_PERSIST_DIR: Path = RAG_ROOT / "chroma_db"
+CHROMA_COLLECTION: str = "rise_knowledge"
 
-# Free, local, no API key. Downloaded once from HuggingFace and cached.
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+# ─────────────────────────────────────────────────────────────────────────────
+# Embedding model
+# ─────────────────────────────────────────────────────────────────────────────
 
-# ─── Groq LLM ─────────────────────────────────────────────────────────────────
+# Free, runs locally, no API key required.
+# ~80 MB download from HuggingFace, cached after first run.
+# 384-dimensional vectors; excellent semantic quality for retrieval tasks.
+EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
-# API key — loaded from environment variable or .env file.
-# Get your free key at: https://console.groq.com
-# Add to your .env file: GROQ_API_KEY=your_key_here
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+# ─────────────────────────────────────────────────────────────────────────────
+# Groq LLM
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Model to use.
-# llama-3.3-70b-versatile  — best quality, free tier, recommended
-# llama-3.1-8b-instant     — faster, lighter, still very capable
-# mixtral-8x7b-32768       — large context window
-GROQ_MODEL = "llama-3.3-70b-versatile"
+# Free tier — 14,400 req/day, 30 req/min, no credit card required.
+# Get your key at: https://console.groq.com
+GROQ_API_KEY: str = os.environ.get("GROQ_API_KEY", "")
 
-# Generation parameters
-GROQ_TEMPERATURE = 0.1    # Low = more factual, less creative. Good for RAG.
-GROQ_MAX_TOKENS = 1024    # Maximum tokens in the response.
-GROQ_TIMEOUT = 30         # Seconds to wait for a response.
+# Available free-tier models (best → fastest):
+#   llama-3.3-70b-versatile   best quality, recommended
+#   llama-3.1-8b-instant      faster, still very capable
+#   mixtral-8x7b-32768        large context window
+GROQ_MODEL: str = "llama-3.3-70b-versatile"
 
-# ─── Retrieval ────────────────────────────────────────────────────────────────
+GROQ_TEMPERATURE: float = 0.1   # Low = factual, grounded — ideal for RAG
+GROQ_MAX_TOKENS: int = 1024
+GROQ_TIMEOUT: int = 30          # seconds
 
-TOP_K_RESULTS = 5
-MAX_DISTANCE_THRESHOLD = 1.8
+# ─────────────────────────────────────────────────────────────────────────────
+# Retrieval
+# ─────────────────────────────────────────────────────────────────────────────
 
-# ─── Chunking ─────────────────────────────────────────────────────────────────
+TOP_K_RESULTS: int = 5
+MAX_DISTANCE_THRESHOLD: float = 1.8   # L2 distance; higher = less similar
 
-DOCUMENT_SEPARATOR = "---"
-MAX_CHUNK_SIZE = 2000
+# ─────────────────────────────────────────────────────────────────────────────
+# Chunking
+# ─────────────────────────────────────────────────────────────────────────────
 
-# ─── Prompting ────────────────────────────────────────────────────────────────
+DOCUMENT_SEPARATOR: str = "---"
+MAX_CHUNK_SIZE: int = 2000   # characters
 
-SYSTEM_PROMPT = """You are the RISE chatbot — the AI assistant for the RISE (Revitalization Intelligence and Smart Empowerment) system built for the City of Montgomery, Alabama.
+# ─────────────────────────────────────────────────────────────────────────────
+# Prompts
+# ─────────────────────────────────────────────────────────────────────────────
 
-RISE helps city planners identify the highest-impact reuse options for city-owned vacant parcels using real data: foot traffic, flood risk, 311 distress signals, civil rights heritage proximity, and active federal grant windows.
+SYSTEM_PROMPT: str = """You are the RISE chatbot — the AI assistant for the \
+RISE (Revitalization Intelligence and Smart Empowerment) system built for the \
+City of Montgomery, Alabama.
 
-Your job is to answer questions accurately and helpfully using ONLY the context provided below.
+RISE helps city planners identify the highest-impact reuse options for \
+city-owned vacant parcels using real data: foot traffic, flood risk, 311 \
+distress signals, civil rights heritage proximity, and active federal grant \
+windows.
+
+Your job is to answer questions accurately and helpfully using ONLY the \
+context provided below.
 
 Rules:
 - Answer only from the provided context. Do not invent facts.
-- If the answer is not in the context, say: "I don't have that information in my knowledge base. I can answer questions about the three RISE hero parcels, the scoring model, data sources, and active grants."
-- Be specific: cite parcel names, scores, distances, and dollar figures when they appear in the context.
-- Keep answers concise and clear — this is a planning tool, not a research paper.
-- If a question involves grant deadlines, always mention the urgency.
-- Never provide legal or financial advice. Refer users to USDA Rural Development Alabama for grant applications.
+- If the answer is not in the context, say: "I don't have that information in \
+my knowledge base. I can answer questions about the three RISE hero parcels, \
+the scoring model, data sources, and active grants."
+- Be specific: cite parcel names, scores, distances, and dollar figures when \
+they appear in the context.
+- Keep answers concise and clear — this is a planning tool, not a research \
+paper.
+- When grant deadlines are mentioned, always state the urgency. As of \
+March 8 2026: USDA RED Q3 closes in 23 days (March 31) and USDA VAPG closes \
+in 38 days (April 15).
+- Never provide legal or financial advice. Refer users to USDA Rural \
+Development Alabama for grant applications.
 """
 
-CONTEXT_PROMPT_TEMPLATE = """CONTEXT FROM RISE KNOWLEDGE BASE:
+CONTEXT_PROMPT_TEMPLATE: str = """\
+CONTEXT FROM RISE KNOWLEDGE BASE:
 {context}
 
 ---
