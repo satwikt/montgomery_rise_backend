@@ -33,7 +33,7 @@ import os
 from datetime import datetime
 import sys
 from datetime import datetime
-
+from brightdata.web_unlocker import WebUnlocker
 
 sys.stdout.reconfigure(encoding='utf-8')
 # ═══════════════════════════════════════════════════════════════════
@@ -841,56 +841,183 @@ def _days_remaining(close_date_str: str) -> int | None:
         return max(0, (close - datetime.now()).days)
     except Exception:
         return None
+def _scrape_grant_portal(max_pages: int = 2) -> list:
+    """
+    Scrape Alabama Grant Portal municipalities page using Bright Data Web Unlocker.
+    Parses up to max_pages pages (15 grants per page).
+    Returns list of grant dicts.
+    """
+    if not BRIGHT_DATA_KEY:
+        raise ValueError("BRIGHT_DATA_KEY not set")
+
+    from html.parser import HTMLParser
+
+    class _TGPParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.grants = []
+            self._current = {}
+            self._capture = None
+
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            cls = attrs.get("class", "")
+            href = attrs.get("href", "")
+            # Grant detail link — signals start of a new grant card
+            if tag == "a" and "/grant-details/" in href and "View" not in href:
+                self._current = {"url": "https://alabama.thegrantportal.com" + href if href.startswith("/") else href}
+            # Title
+            if tag == "a" and "/grant-details/" in href:
+                self._capture = "name"
+            # Deadline label
+            if tag == "span" and "deadline" in cls.lower():
+                self._capture = "deadline"
+            # Amount label  
+            if tag == "span" and "amount" in cls.lower():
+                self._capture = "amount"
+
+        def handle_data(self, data):
+            data = data.strip()
+            if not data or not self._capture:
+                return
+            if self._capture == "name" and data and len(data) > 5:
+                self._current["name"] = data
+                self._capture = None
+                if "name" in self._current:
+                    self.grants.append(self._current)
+                    self._current = {}
+            elif self._capture == "deadline":
+                self._current["deadline"] = data
+                self._capture = None
+            elif self._capture == "amount":
+                self._current["amount"] = data
+                self._capture = None
+
+    unlocker = WebUnlocker(
+    BRIGHTDATA_WEBUNLOCKER_BEARER=BRIGHT_DATA_KEY,
+    ZONE_STRING=os.environ.get("ZONE_STRING", "")
+)
+    all_grants = []
+    seen_names = set()
+
+    for page in range(1, max_pages + 1):
+        url = (
+            f"https://alabama.thegrantportal.com/municipalities"
+            f"?search=&sort_by=updated_at&interests=38&filter=0&page={page}"
+        )
+        print(f"  [BRIGHT DATA] Scraping page {page}: {url}")
+        result = unlocker.get_source_safe(url)
+
+        if not result or not result.data:
+            print(f"  [BRIGHT DATA] ⚠️ Empty response on page {page}")
+            break
+
+        # Simpler regex-based extraction (more reliable than HTML parser for this site)
+        import re
+        html = result.data
+
+        # Extract grant blocks — each has title, deadline, amount, TGP ID
+        titles    = re.findall(r'href="/grant-details/\d+/[^"]+">([^<]{10,})</a>', html)
+        deadlines = re.findall(r'Deadline\s*:\s*</span>\s*([^<\n]{2,30})', html)
+        amounts   = re.findall(r'Funding Amount\s*:\s*</span>\s*([^<\n]{1,20})', html)
+        tgp_ids   = re.findall(r'TGP Grant ID:\s*</span>\s*(\d+)', html)
+        urls      = re.findall(r'href="(https://alabama\.thegrantportal\.com/grant-details/[^"]+)"', html)
+
+        # Zip together — take minimum length to stay aligned
+        count = min(len(titles), len(tgp_ids))
+        for i in range(count):
+            name = titles[i].strip()
+            if not name or name.lower() in seen_names:
+                continue
+            seen_names.add(name.lower())
+
+            deadline_str = deadlines[i].strip() if i < len(deadlines) else "Unknown"
+            amount_str   = amounts[i].strip()   if i < len(amounts)   else "Unknown"
+            tgp_id       = tgp_ids[i]           if i < len(tgp_ids)   else None
+            detail_url   = urls[i]               if i < len(urls)      else None
+
+            # Parse days remaining from deadline
+            days = None
+            if deadline_str and deadline_str.lower() not in ("ongoing", "unknown", ""):
+                try:
+                    dl = datetime.strptime(deadline_str, "%m/%d/%Y")
+                    days = max(0, (dl - datetime.now()).days)
+                except Exception:
+                    pass
+
+            all_grants.append({
+                "name":           name,
+                "status":         "open",
+                "days_remaining": days,
+                "deadline":       deadline_str,
+                "amount":         amount_str,
+                "tgp_id":         tgp_id,
+                "url":            detail_url,
+                "source":         "grant_portal_AL",
+            })
+
+        print(f"  [BRIGHT DATA] ✅ Page {page}: {count} grants scraped (${WebUnlocker.COST_PER_REQUEST * page:.4f} total)")
+
+    return all_grants
+
+
 def get_grant_data(keyword="USDA Rural Economic Development"):
+    # ── Tier 1 — grants.gov API (free, no key needed) ─────────────
+    govgrants = []
     try:
         response = requests.post(
             "https://api.grants.gov/v1/api/search2",
             headers={"Content-Type": "application/json"},
-            json={
-                "keyword": keyword,
-                "oppStatuses": "posted",
-                "rows": 10,
-                "sortBy": "openDate|desc"
-            },
+            json={"keyword": keyword, "oppStatuses": "posted", "rows": 10, "sortBy": "openDate|desc"},
             timeout=5
         )
         response.raise_for_status()
-        data = response.json()
-
+        data  = response.json()
         inner = data.get("data", {})
-        hits = inner.get("oppHits", [])
-        hit_count = inner.get("hitCount", 0)
+        hits  = inner.get("oppHits", [])
 
-        grants = []
         for opp in hits:
-            grants.append({
+            govgrants.append({
                 "name":           opp.get("title"),
-    "status":         "open",
-    "days_remaining": _days_remaining(opp.get("closeDate", "")),
-    "opportunity_id": opp.get("number"),
-    "agency":         opp.get("agency"),
-    "open_date":      opp.get("openDate"),
-    "close_date":     opp.get("closeDate"),
-    "cfda":           opp.get("cfdaList", []),
-    "source":         "grants.gov API"
+                "status":         "open",
+                "days_remaining": _days_remaining(opp.get("closeDate", "")),
+                "opportunity_id": opp.get("number"),
+                "agency":         opp.get("agency"),
+                "open_date":      opp.get("openDate"),
+                "close_date":     opp.get("closeDate"),
+                "cfda":           opp.get("cfdaList", []),
+                "source":         "grants.gov API",
             })
-
-        print(f"  [GRANTS] ✅ {len(grants)} of {hit_count} open grants found")
-        return {"grants": grants, "source": "grants.gov_api"}
+        print(f"  [GRANTS] ✅ {len(govgrants)} open grants (grants.gov API)")
 
     except Exception as e:
-        print(f"  [GRANTS] ⚠️ grants.gov API failed ({e}) — using static fallback")
-        return {
-            "grants": [
-                {"name": "USDA Rural Economic Development Q3",
-                 "status": "open", "days_remaining": 23, "source": "static_fallback"},
-                {"name": "USDA Value Added Producer Grant",
-                 "status": "open", "days_remaining": 38, "source": "static_fallback"},
-            ],
-            "source": "static_fallback"
-        }
-   
-   
+        print(f"  [GRANTS] ⚠️ grants.gov API failed ({e})")
+
+    # ── Tier 2 — Bright Data → Alabama Grant Portal ────────────────
+    portal_grants = []
+    try:
+        portal_grants = _scrape_grant_portal(max_pages=2)
+        print(f"  [GRANTS] ✅ {len(portal_grants)} grants scraped (Alabama Grant Portal via Bright Data)")
+    except Exception as e:
+        print(f"  [GRANTS] ⚠️ Bright Data scrape failed ({e})")
+
+    # ── Merge both sources ─────────────────────────────────────────
+    all_live = govgrants + portal_grants
+    if all_live:
+        return {"grants": all_live, "source": "grants.gov_api+grant_portal_AL"}
+
+    # ── Tier 3 — Static fallback (never breaks demo) ───────────────
+    print("  [GRANTS] ⚠️ All sources failed — using static fallback")
+    return {
+        "grants": [
+            {"name": "USDA Rural Economic Development Q3", "status": "open",
+             "days_remaining": 23, "source": "static_fallback"},
+            {"name": "USDA Value Added Producer Grant",    "status": "open",
+             "days_remaining": 38, "source": "static_fallback"},
+        ],
+        "source": "static_fallback",
+    }
+
 def merge_grants(static_grants: list, live_grants: list) -> list:
     """
     Merge static parcel grant flags with live grants.gov results.
