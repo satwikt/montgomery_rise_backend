@@ -38,7 +38,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 # ═══════════════════════════════════════════════════════════════════
 
 GEMINI_API_KEY  = os.environ.get("GEMINI_API_KEY", "YOUR_GEMINI_KEY")
-GEMINI_MODEL    = "gemini-2.5-pro"
+GEMINI_MODEL    = "gemini-3.1-flash-lite-preview"
 GEMINI_API_URL  = (
     f"https://generativelanguage.googleapis.com/v1beta/"
     f"models/{GEMINI_MODEL}:generateContent"
@@ -52,106 +52,187 @@ ARCGIS_URL = (
 )
 ARCGIS_RADIUS_FEET = 5280   # 1 mile
 
-# ═══════════════════════════════════════════════════════════════════
-# 1. HERO PARCELS  — real GIS-verified data, no API pull needed
-# ═══════════════════════════════════════════════════════════════════
-# Source: Montgomery GIS + Nominatim reverse geocode, March 2026
-# These are the 3 pre-selected hero parcels for the RISE demo.
-# Update coords/parcel_id if Kathia verifies different addresses.
+"""
+HERO_PARCELS — FINAL, all addresses reverse-geocoded and confirmed
+==================================================================
+All three parcels GIS-verified city-owned, ≥1 acre, real coords.
+
+  Parcel A — Heritage
+    Address : Bibb Street, Montgomery, AL 36104
+    Coords  : (32.37894, -86.31094)
+    Acres   : 8.34  |  Anchor: Rosa Parks Museum (0.167mi)
+
+  Parcel B — IX Hub / Digital Infrastructure
+    Address : Upper Wetumpka Road, Montgomery, AL 36130
+    Coords  : (32.381408, -86.297163)
+    Acres   : 2.43  |  Anchor: MGMix IX Node (0.214mi)
+
+  Parcel C — Community Resilience / Food Access  ← ZIP 36108 CONFIRMED
+    Address : 1600 Terminal Road, Montgomery, AL 36108
+    Coords  : (32.358433, -86.338177)
+    Acres   : 6.20  |  Anchor: West Montgomery CC (0.702mi)
+    Neighborhood: Maxwell Heights / Gibbs Village — real 36108 food desert ZIP
+"""
 
 HERO_PARCELS = [
     {
-        # ── Parcel A: Heritage ──────────────────────────────────────
+        # ── Parcel A: Heritage ──────────────────────────────────────────
+        # GIS: 8.34 acres · 0.167mi Rosa Parks Museum · ZIP 36101
+        # Confirmed by diag_parcels.py row: 36101 / 8.34ac / Rosa Parks Museum 0.167mi
         "story":          "Heritage",
         "label":          "Parcel A — Heritage",
-        "address":        "Commerce Street, Montgomery, Alabama 36104",
-        "addr_source":    "geocoded",
+        "address":        "Bibb Street, Montgomery, Alabama 36104",
+        "addr_source":    "reverse_geocoded",
         "parcel_id":      "11 01 12 4 004 001.000",
         "owner":          "City of Montgomery",
         "coords":         (32.37894285621073, -86.31094342590941),
         "acres":          8.3357196,
         "zip":            "36104",
         "nearest_anchor": "Rosa Parks Museum",
-        "min_dist":       0.154,          # miles
-        "avg_dist":       0.154,
-        "raw_attrs":      {"ImpValue": 0},
-        # Context for scoring + AI
+        "min_dist":       0.167,
         "zone_context":   "heritage",
+        "raw_attrs":      {"ImpValue": 0},
+
         "health_flags": {
-            "food_insecurity_pct":   28,
-            "asthma_rate_multiplier": 1.6,
-            "nearest_clinic_mi":     1.2,
+            "poverty_rate_pct":           40.9,
+            "uninsured_pct":              11.4,
+            "public_health_coverage_pct": 46.5,
+            "median_household_income":    31231,
+            "obesity_rate_pct":           39.8,
+            "nearest_clinic_mi":          0.6,
         },
         "grant_flags": [
-            {"name": "USDA Value Added Producer Grant", "status": "open",
-             "days_remaining": 41, "eligibility_pct": 50, "match": "1:1"},
-            {"name": "USDA Rural Economic Development Q3",
-             "status": "open", "days_remaining": 26,
-             "eligibility_pct": 70, "match": "20%"},
+            {
+                "name":            "USDA Value Added Producer Grant (VAPG)",
+                "status":          "open",
+                "days_remaining":  39,
+                "eligibility_pct": 50,
+                "match":           "1:1",
+                "url":             "https://www.rd.usda.gov/programs-services/business-programs/value-added-producer-grants-23",
+            },
+            {
+                "name":            "USDA Rural Economic Development Loan & Grant (REDLG) Q4",
+                "status":          "open",
+                "days_remaining":  115,
+                "eligibility_pct": 70,
+                "match":           "20%",
+                "url":             "https://www.rd.usda.gov/programs-services/business-programs/rural-economic-development-loan-grant-program/al",
+            },
         ],
     },
+
     {
-        # ── Parcel B: IX / Smart Infrastructure ────────────────────
-        "story":          "Smart Infrastructure",
+        # ── Parcel B: Digital Infrastructure / IX Corridor ─────────────
+        # GIS: 2.43 acres · 0.214mi MGMix IX Node · ZIP 36101
+        # Confirmed by diag_parcels.py row: 36101 / 2.43ac / MGMix IX Node 0.214mi
+        # Story: 0.21mi from the MGMix internet exchange point —
+        #        direct fibre proximity for data/tech/workforce use
+        #        Meta $1.5B data centre 2mi east makes this the IX corridor story
+        "story":          "Digital Infrastructure Corridor",
         "label":          "Parcel B — IX Hub",
-        "address":        "643 Kimball Street, Montgomery, Alabama 36108",
-        "addr_source":    "geocoded",
-        "parcel_id":      "11 05 15 1 010 022.000",
+        "address":        "Upper Wetumpka Road, Montgomery, Alabama 36130",
+        "addr_source":    "reverse_geocoded",
+        "parcel_id":      "10 03 07 1 010 004.000",   # confirmed from parcel_candidates.json
         "owner":          "City of Montgomery",
-        "coords":         (32.3683555135919, -86.3438915584216),
-        "acres":          0.33057995,
-        "zip":            "36108",
-        "nearest_anchor": "Maxwell AFB Gate",
-        "min_dist":       0.891,
-        "avg_dist":       0.891,
-        "raw_attrs":      {"ImpValue": 0},
+        "coords":         (32.381408, -86.297163),     # confirmed from parcel_candidates.json
+        "acres":          2.42664258,
+        "zip":            "36130",                     # confirmed: state agency ZIP, Clisby Park area
+        "nearest_anchor": "MGMix IX Node",
+        "min_dist":       0.214,
         "zone_context":   "ix_hub",
+        "raw_attrs":      {"ImpValue": 0},
+
         "health_flags": {
-            "unemployment_rate":     11.2,
-            "workforce_in_tech_pct":  4.1,
-            "veterans_in_workforce":  18,
+            # Workforce / economic profile for the IX corridor story
+            "unemployment_rate_pct":         7.3,
+            "labor_force_participation_pct": 44.8,
+            "poverty_rate_pct":              35.0,
+            "median_household_income":       33291,
+            "per_capita_income":             19859,
+            "maxwell_afb_personnel":         14500,
+            "meta_datacenter_investment_bn": 1.5,
+            "meta_datacenter_sqft":          1300000,
         },
         "grant_flags": [
-            {"name": "USDA Rural Economic Development Q3",
-             "status": "open", "days_remaining": 26,
-             "eligibility_pct": 70, "match": "20%"},
-            {"name": "EDA Tech Hubs FY25 Stage II",
-             "status": "closed", "days_remaining": None,
-             "note": "Closed Feb 18 2026 — monitor FY26 NOFO"},
+            {
+                "name":            "USDA Rural Economic Development Loan & Grant (REDLG) Q4",
+                "status":          "open",
+                "days_remaining":  115,
+                "eligibility_pct": 70,
+                "match":           "20%",
+                "url":             "https://www.rd.usda.gov/programs-services/business-programs/rural-economic-development-loan-grant-program/al",
+            },
+            {
+                "name":            "SBA Small Business Innovation Research (SBIR) — DoD Phase I",
+                "status":          "open",
+                "days_remaining":  52,
+                "eligibility_pct": 100,
+                "match":           "None",
+                "note":            "Defence-adjacent and veteran-owned businesses eligible",
+                "url":             "https://www.sbir.gov/solicitations",
+            },
         ],
     },
+
     {
-        # ── Parcel C: Food Desert / Economic Urgency ───────────────
-        "story":          "Economic Urgency",
-        "label":          "Parcel C — Food Desert",
-        "address":        "Coosa Street, Montgomery, Alabama, 36104",
-        "addr_source":    "geocoded",
-        "parcel_id":      "11 01 12 4 004 001.000",
+        # ── Parcel C: Community Resilience / West Montgomery ───────────
+        # GIS: 6.20 acres · 0.702mi West Montgomery CC · ZIP 36108 (confirmed)
+        # Reverse geocode: 1600 Terminal Road, Maxwell Heights / Gibbs Village
+        # ZIP 36108 = real food desert ZIP — this parcel is legitimate for the story
+        "story":          "Community Resilience & Food Access",
+        "label":          "Parcel C — Community Resilience",
+        "address":        "1600 Terminal Road, Montgomery, Alabama 36108",
+        "addr_source":    "reverse_geocoded",
+        "parcel_id":      "11 06 23 2 003 001.000",
         "owner":          "City of Montgomery",
-        "coords":         ( 32.37918972033555,-86.30866571125091),
-        "acres":          8.3357196,
-        "zip":            "36104",
-        "nearest_anchor": "MGMix (IX)",
-        "min_dist":       0.117,
-        "avg_dist":       0.117,
-        "raw_attrs":      {"ImpValue": 0},
+        "coords":         (32.358433, -86.338177),
+        "acres":          6.20,
+        "zip":            "36108",                    # confirmed: Maxwell Heights / Gibbs Village
+        "nearest_anchor": "West Montgomery Community Center",
+        "min_dist":       0.702,
         "zone_context":   "food_desert",
+        "raw_attrs":      {"ImpValue": 0},
+
         "health_flags": {
-            "food_insecurity_pct":    41,
-            "asthma_rate_multiplier":  2.4,
-            "nearest_grocery_mi":     2.8,
-            "median_income":          22400,
+            # ZIP 36108 specific — ACS 2019-2023 5-Year + PIH 2024
+            "food_insecurity_pct":          32.0,   # PIH 2024 citywide (36108 elevated given 35% poverty)
+            "obesity_rate_pct":             39.8,   # PIH 2024 Montgomery citywide
+            "poverty_rate_pct":             35.0,   # ACS 2024 5-Year ZIP 36108 (vs 21.2% citywide)
+            "unemployment_rate_pct":         7.3,   # ACS 2023 ZIP 36108 (vs 4.8% AL state)
+            "median_household_income":      29400,  # ACS 2023 ZIP 36108 (vs $33,291 citywide — Parcel B figure was incorrectly copied here)
+            "uninsured_pct":                10.0,   # PIH 2024
+            "nearest_full_grocery_mi":       1.4,   # Piggly Wiggly / Food Outlet, West Fairview Ave
+            "nearest_grocery_name":         "Piggly Wiggly / Food Outlet (West Fairview Ave)",
+            "transport_barrier":            True,   # PIH 2024: transportation = root cause of food inequity
+            "chronic_conditions_noted":     ["asthma", "diabetes", "hypertension", "heart disease"],
         },
         "grant_flags": [
-            {"name": "USDA Rural Economic Development Q3",
-             "status": "open", "days_remaining": 26,
-             "eligibility_pct": 75, "match": "20%"},
-            {"name": "USDA Value Added Producer Grant",
-             "status": "open", "days_remaining": 41,
-             "eligibility_pct": 50, "match": "1:1"},
+            {
+                "name":            "USDA Rural Economic Development Loan & Grant (REDLG) Q4",
+                "status":          "open",
+                "days_remaining":  115,
+                "eligibility_pct": 75,
+                "match":           "20%",
+                "url":             "https://www.rd.usda.gov/programs-services/business-programs/rural-economic-development-loan-grant-program/al",
+            },
+            {
+                "name":            "USDA Value Added Producer Grant (VAPG)",
+                "status":          "open",
+                "days_remaining":  39,
+                "eligibility_pct": 50,
+                "match":           "1:1",
+                "url":             "https://www.rd.usda.gov/programs-services/business-programs/value-added-producer-grants-23",
+            },
         ],
     },
 ]
+
+# =============================================================================
+# ALL FIELDS CONFIRMED — reverse_geocode_check.py run March 7, 2026
+# =============================================================================
+# Parcel A: Bibb Street, Montgomery, AL 36104
+# Parcel B: Upper Wetumpka Road, Montgomery, AL 36130  (Clisby Park)
+# Parcel C: 1600 Terminal Road, Montgomery, AL 36108   (Maxwell Heights / Gibbs Village)
 
 # ═══════════════════════════════════════════════════════════════════
 # 2. ANCHOR COORDINATES  (used in heritage + industrial scoring)
@@ -624,7 +705,6 @@ def score_311_density(p_lat: float, p_lon: float, radius_miles: float = 0.5, day
             return _311_fallback()
             
         data = resp.json()
-        print(data)
         if data.get("error"):
             print(f"  [311] ⚠️ ArcGIS error: {data['error']} — using fallback")
             return _311_fallback()
@@ -791,7 +871,7 @@ RISE SCORES (already computed — explain these, do not recalculate):
 - Economic score:   {scores['economic']}/100
 - Vacancy score:    {scores['vacancy']}/100
 - Flood score:      {scores['flood']}/5  [{scores['flood_label']}]
-- 311 score:    {scores['distress']}/5  [{scores['transit_label']}]
+- 311 score:    {scores['distress']}/5  
 - FINAL SCORE:      {scores['final']}/100
 
 ARCGIS FOOT TRAFFIC (real Montgomery data — Most Visited Locations within 1 mile):
@@ -808,13 +888,22 @@ COMMUNITY HEALTH FLAGS:
 - {health_str}
 
 YOUR TASK:
+
 1. Recommend the top 3 land reuse options for this parcel.
-2. For each: name, fit_score (0-100), 2-sentence plain-English explanation
-   grounded in the scores above, cost_tier (Quick Win <$500K / Mid-Term $500K-$5M / Major $5M+),
-   grant_flag (reference the open grants above if relevant).
-3. Speak as a community advocate who understands both data and human impact.
-4. Reference the ArcGIS foot traffic data — it tells the real neighbourhood story.
-5. Total response under 300 words.
+
+2. STRATEGIC ZONING CONSTRAINT: - If Story is "Heritage", prioritize tourism, local arts, commemorative spaces, and small business incubators. DO NOT recommend food pantries or grocery hubs for Heritage parcels; those are reserved for the "Community Resilience" category.
+
+If Story is "Digital Infrastructure", prioritize tech-workforce training, data centers, or secure labs.
+
+If Story is "Community Resilience", prioritize food access and health equity.
+
+3. For each recommendation: name, fit_score (0-100), 2-sentence plain-English explanation grounded in the scores above, cost_tier (Quick Win <$500K / Mid-Term $500K-$5M / Major $5M+), grant_flag (reference the open grants above if relevant).
+
+4. Speak as a community advocate who understands both data and human impact.
+
+5. Reference the ArcGIS foot traffic data—it tells the real neighbourhood story.
+
+6. Total response under 300 words.
 
 Respond ONLY in this JSON, no extra text:
 {{
@@ -839,6 +928,7 @@ def analyse_with_gemini(parcel: dict, foot_traffic: dict) -> dict:
         return _mock_ai_analysis(parcel)
 
     prompt = build_ai_prompt(parcel, foot_traffic)
+    print("prompt: "+prompt)
     url    = f"{GEMINI_API_URL}?key={GEMINI_API_KEY}"
 
     payload = {
@@ -864,7 +954,7 @@ def analyse_with_gemini(parcel: dict, foot_traffic: dict) -> dict:
         raw = data["candidates"][0]["content"]["parts"][0]["text"].strip()
         raw = raw.replace("```json", "").replace("```", "").strip()
         analysis = json.loads(raw)
-
+        print(analysis)
         usage = data.get("usageMetadata", {})
         inp   = usage.get("promptTokenCount", 0)
         out   = usage.get("candidatesTokenCount", 0)
