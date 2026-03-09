@@ -835,6 +835,8 @@ def compute_score(parcel: dict, foot_traffic: dict) -> dict:
 # Grants Bright Data Function
 # ═══════════════════════════════════════════════════════════════════
 BRIGHT_DATA_KEY = os.environ.get("BRIGHT_DATA_KEY", "")
+SCRAPER_ID = os.environ.get("BRIGHT_DATA_SCRAPER_ID", "")  # from your scraper library URL
+
 def _days_remaining(close_date_str: str) -> int | None:
     try:
         close = datetime.strptime(close_date_str, "%m/%d/%Y")
