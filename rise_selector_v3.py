@@ -843,122 +843,90 @@ def _days_remaining(close_date_str: str) -> int | None:
         return None
 def _scrape_grant_portal(max_pages: int = 2) -> list:
     """
-    Scrape Alabama Grant Portal municipalities page using Bright Data Web Unlocker.
-    Parses up to max_pages pages (15 grants per page).
-    Returns list of grant dicts.
+    Scrape Alabama Grant Portal using Bright Data Web Scraper API.
+    Triggers a collection job, polls until done, returns parsed grants.
     """
-    if not BRIGHT_DATA_KEY:
-        raise ValueError("BRIGHT_DATA_KEY not set")
+    if not BRIGHT_DATA_API_KEY or not SCRAPER_ID:
+        raise ValueError("BRIGHT_DATA_API_KEY or BRIGHT_DATA_SCRAPER_ID not set")
 
-    from html.parser import HTMLParser
+    headers = {
+        "Authorization": f"Bearer {BRIGHT_DATA_API_KEY}",
+        "Content-Type": "application/json",
+    }
 
-    class _TGPParser(HTMLParser):
-        def __init__(self):
-            super().__init__()
-            self.grants = []
-            self._current = {}
-            self._capture = None
+    # 1. Trigger the collection
+    urls_to_scrape = [
+        {"url": f"https://alabama.thegrantportal.com/municipalities?search=&sort_by=updated_at&interests=38&filter=0&page={page}"}
+        for page in range(1, max_pages + 1)
+    ]
 
-        def handle_starttag(self, tag, attrs):
-            attrs = dict(attrs)
-            cls = attrs.get("class", "")
-            href = attrs.get("href", "")
-            # Grant detail link — signals start of a new grant card
-            if tag == "a" and "/grant-details/" in href and "View" not in href:
-                self._current = {"url": "https://alabama.thegrantportal.com" + href if href.startswith("/") else href}
-            # Title
-            if tag == "a" and "/grant-details/" in href:
-                self._capture = "name"
-            # Deadline label
-            if tag == "span" and "deadline" in cls.lower():
-                self._capture = "deadline"
-            # Amount label  
-            if tag == "span" and "amount" in cls.lower():
-                self._capture = "amount"
+    print(f"  [BRIGHT DATA] Triggering collection for {len(urls_to_scrape)} pages...")
+    trigger_resp = requests.post(
+        f"https://api.brightdata.com/datasets/v3/trigger?collector={SCRAPER_ID}&type=discover_new",
+        headers=headers,
+        json=urls_to_scrape,
+        timeout=30,
+    )
+    trigger_resp.raise_for_status()
+    snapshot_id = trigger_resp.json().get("snapshot_id")
+    if not snapshot_id:
+        raise ValueError(f"No snapshot_id returned: {trigger_resp.json()}")
+    print(f"  [BRIGHT DATA] ✅ Job triggered — snapshot_id: {snapshot_id}")
 
-        def handle_data(self, data):
-            data = data.strip()
-            if not data or not self._capture:
-                return
-            if self._capture == "name" and data and len(data) > 5:
-                self._current["name"] = data
-                self._capture = None
-                if "name" in self._current:
-                    self.grants.append(self._current)
-                    self._current = {}
-            elif self._capture == "deadline":
-                self._current["deadline"] = data
-                self._capture = None
-            elif self._capture == "amount":
-                self._current["amount"] = data
-                self._capture = None
-
-    unlocker = WebUnlocker(
-    BRIGHTDATA_WEBUNLOCKER_BEARER=BRIGHT_DATA_KEY,
-    ZONE_STRING=os.environ.get("ZONE_STRING", "")
-)
-    all_grants = []
-    seen_names = set()
-
-    for page in range(1, max_pages + 1):
-        url = (
-            f"https://alabama.thegrantportal.com/municipalities"
-            f"?search=&sort_by=updated_at&interests=38&filter=0&page={page}"
-        )
-        print(f"  [BRIGHT DATA] Scraping page {page}: {url}")
-        result = unlocker.get_source_safe(url)
-
-        if not result or not result.data:
-            print(f"  [BRIGHT DATA] ⚠️ Empty response on page {page}")
+    # 2. Poll until ready (status: running → ready)
+    status_url = f"https://api.brightdata.com/datasets/v3/snapshot/{snapshot_id}?format=json"
+    for attempt in range(24):  # max ~2 min
+        time.sleep(5)
+        status_resp = requests.get(status_url, headers=headers, timeout=15)
+        status_resp.raise_for_status()
+        status = status_resp.json().get("status")
+        print(f"  [BRIGHT DATA] Poll {attempt + 1}: status = {status}")
+        if status == "ready":
             break
+        if status == "failed":
+            raise ValueError("Bright Data collection job failed")
+    else:
+        raise TimeoutError("Bright Data job did not complete within 2 minutes")
 
-        # Simpler regex-based extraction (more reliable than HTML parser for this site)
-        import re
-        html = result.data
+    # 3. Fetch results
+    results_resp = requests.get(
+        f"https://api.brightdata.com/datasets/v3/snapshot/{snapshot_id}?format=json",
+        headers=headers,
+        timeout=30,
+    )
+    results_resp.raise_for_status()
+    raw_results = results_resp.json()
+    print(f"  [BRIGHT DATA] ✅ {len(raw_results)} records returned")
 
-        # Extract grant blocks — each has title, deadline, amount, TGP ID
-        titles    = re.findall(r'href="/grant-details/\d+/[^"]+">([^<]{10,})</a>', html)
-        deadlines = re.findall(r'Deadline\s*:\s*</span>\s*([^<\n]{2,30})', html)
-        amounts   = re.findall(r'Funding Amount\s*:\s*</span>\s*([^<\n]{1,20})', html)
-        tgp_ids   = re.findall(r'TGP Grant ID:\s*</span>\s*(\d+)', html)
-        urls      = re.findall(r'href="(https://alabama\.thegrantportal\.com/grant-details/[^"]+)"', html)
+    # 4. Normalize to your existing grant schema
+    grants = []
+    seen_names = set()
+    for item in raw_results:
+        name = (item.get("title") or item.get("name") or "").strip()
+        if not name or name.lower() in seen_names:
+            continue
+        seen_names.add(name.lower())
 
-        # Zip together — take minimum length to stay aligned
-        count = min(len(titles), len(tgp_ids))
-        for i in range(count):
-            name = titles[i].strip()
-            if not name or name.lower() in seen_names:
-                continue
-            seen_names.add(name.lower())
+        deadline_str = item.get("deadline") or item.get("close_date") or "Unknown"
+        days = None
+        try:
+            from datetime import datetime
+            dl = datetime.strptime(deadline_str, "%m/%d/%Y")
+            days = max(0, (dl - datetime.now()).days)
+        except Exception:
+            pass
 
-            deadline_str = deadlines[i].strip() if i < len(deadlines) else "Unknown"
-            amount_str   = amounts[i].strip()   if i < len(amounts)   else "Unknown"
-            tgp_id       = tgp_ids[i]           if i < len(tgp_ids)   else None
-            detail_url   = urls[i]               if i < len(urls)      else None
+        grants.append({
+            "name":           name,
+            "status":         "open",
+            "days_remaining": days,
+            "deadline":       deadline_str,
+            "amount":         item.get("amount") or item.get("funding_amount") or "Unknown",
+            "url":            item.get("url") or item.get("link") or "",
+            "source":         "grant_portal_AL",
+        })
 
-            # Parse days remaining from deadline
-            days = None
-            if deadline_str and deadline_str.lower() not in ("ongoing", "unknown", ""):
-                try:
-                    dl = datetime.strptime(deadline_str, "%m/%d/%Y")
-                    days = max(0, (dl - datetime.now()).days)
-                except Exception:
-                    pass
-
-            all_grants.append({
-                "name":           name,
-                "status":         "open",
-                "days_remaining": days,
-                "deadline":       deadline_str,
-                "amount":         amount_str,
-                "tgp_id":         tgp_id,
-                "url":            detail_url,
-                "source":         "grant_portal_AL",
-            })
-
-        print(f"  [BRIGHT DATA] ✅ Page {page}: {count} grants scraped (${WebUnlocker.COST_PER_REQUEST * page:.4f} total)")
-
-    return all_grants
+    return grants
 
 
 def get_grant_data(keyword="USDA Rural Economic Development"):
