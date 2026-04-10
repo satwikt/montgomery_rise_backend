@@ -662,6 +662,76 @@ def _utcnow() -> str:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# ArcGIS parcel query — city-owned vacant lots
+# ─────────────────────────────────────────────────────────────────────────────
+
+import requests as _requests
+
+_ARCGIS_PARCEL_URL = (
+    "https://services7.arcgis.com/xNUwUjOJqYE54USz/arcgis/rest/services/"
+    "SURPLUS_CITY_PROPERTIES_polygon/FeatureServer/0/query"
+)
+
+
+def _fetch_vacant_city_parcels() -> list[dict[str, Any]]:
+    """
+    Query the Montgomery ArcGIS surplus city properties layer.
+
+    Filters: DISPLAY = 'YES' (publicly listed lots only — 79 parcels).
+
+    Returns a list of dicts ready to be serialised as GeoJSON-style features.
+    """
+    params = {
+        "where": "DISPLAY = 'YES'",
+        "outFields": "FID,TAX_MAP,PARCEL_NUM,STREET_NUM,STREET_NAM,LOCATION,NOTES,STRATEGY,District,CALC_ACRE,SQ_FT",
+        "returnGeometry": "true",
+        "outSR": "4326",
+        "f": "json",
+        "resultRecordCount": 2000,
+    }
+    try:
+        resp = _requests.get(_ARCGIS_PARCEL_URL, params=params, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exc:
+        logger.warning("ArcGIS parcel query failed: %s", exc)
+        raise HTTPException(status_code=502, detail=f"ArcGIS query failed: {exc}") from exc
+
+    features = []
+    for feat in data.get("features", []):
+        attrs = feat.get("attributes", {})
+        geom  = feat.get("geometry", {})
+
+        # Compute centroid from polygon rings.
+        lat, lon = None, None
+        if "rings" in geom:
+            ring = geom["rings"][0]
+            if ring:
+                lon = sum(pt[0] for pt in ring) / len(ring)
+                lat = sum(pt[1] for pt in ring) / len(ring)
+
+        street_num = (attrs.get("STREET_NUM") or "").strip()
+        street_nam = (attrs.get("STREET_NAM") or "").strip()
+        address = f"{street_num} {street_nam}".strip() if street_num else street_nam
+
+        features.append({
+            "parcel_id":  attrs.get("TAX_MAP"),
+            "parcel_num": attrs.get("PARCEL_NUM"),
+            "address":    address,
+            "location":   (attrs.get("LOCATION") or "").strip(),
+            "notes":      (attrs.get("NOTES") or "").strip(),
+            "strategy":   attrs.get("STRATEGY"),
+            "district":   attrs.get("District"),
+            "acres":      attrs.get("CALC_ACRE"),
+            "sq_ft":      attrs.get("SQ_FT"),
+            "lat":        lat,
+            "lon":        lon,
+        })
+
+    return features
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Endpoint 1 — Health check
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -734,6 +804,29 @@ def list_parcels() -> dict[str, Any]:
             }
         )
     return {"parcels": parcels}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Endpoint — City-owned vacant parcels (map layer)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@app.get("/map/vacant-parcels", summary="City-owned vacant parcels", tags=["Map"])
+def vacant_parcels() -> dict[str, Any]:
+    """
+    Returns all city-owned vacant parcels from the Montgomery ArcGIS parcel layer.
+
+    Filters: ``Owner LIKE '%CITY OF MONTGOMERY%'`` and ``ImpValue = 0``.
+
+    Each feature includes ``lat``/``lon`` (WGS84 centroid), ``parcel_id``,
+    ``address``, ``acres``, and ``land_value`` — ready to drop onto a map.
+    """
+    features = _fetch_vacant_city_parcels()
+    return {
+        "count": len(features),
+        "parcels": features,
+        "fetched_at": _utcnow(),
+    }
 
 
 # ─────────────────────────────────────────────────────────────────────────────
