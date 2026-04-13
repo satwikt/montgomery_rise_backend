@@ -701,7 +701,7 @@ def score_311_density(p_lat: float, p_lon: float, radius_miles: float = 0.5, day
     }
     
     try:
-        resp = requests.get(MONTGOMERY_311_URL, params=params, timeout=15)
+        resp = requests.get(MONTGOMERY_311_URL, params=params, timeout=15, verify=False)
         
         if resp.status_code != 200:
             print(f"  [311] ⚠️ HTTP {resp.status_code} — using fallback")

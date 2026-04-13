@@ -36,12 +36,14 @@ Railway deploy
 from __future__ import annotations
 
 import copy
+import json
 import logging
 import os
 import threading
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path as FilePath
 from typing import Any, Optional
 
 import uvicorn
@@ -262,6 +264,20 @@ class CustomParcelRequest(BaseModel):
                 }
             ]
         ],
+    )
+
+
+class WeightsRequest(BaseModel):
+    """Request body for POST /config/{city_id}/weights."""
+
+    weights: dict[str, float] = Field(
+        ...,
+        description="Score dimension weights. Keys: heritage, industrial, activity, proximity, economic, vacancy, flood, 311. Values must sum to 1.0.",
+        examples=[{
+            "heritage": 0.25, "industrial": 0.20, "activity": 0.15,
+            "proximity": 0.10, "economic": 0.10, "vacancy": 0.10,
+            "flood": 0.05, "311": 0.05,
+        }],
     )
 
 
@@ -662,10 +678,60 @@ def _utcnow() -> str:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Score weights — per-city persistence
+# ─────────────────────────────────────────────────────────────────────────────
+
+_WEIGHTS_FILE = FilePath(__file__).parent / "city_weights.json"
+
+_DEFAULT_WEIGHTS: dict[str, float] = {
+    "heritage":   0.25,
+    "industrial": 0.20,
+    "activity":   0.15,
+    "proximity":  0.10,
+    "economic":   0.10,
+    "vacancy":    0.10,
+    "flood":      0.05,
+    "311":        0.05,
+}
+
+
+def _load_weights(city_id: str) -> dict[str, float]:
+    """Return saved weights for *city_id*, falling back to defaults."""
+    if _WEIGHTS_FILE.exists():
+        try:
+            data = json.loads(_WEIGHTS_FILE.read_text(encoding="utf-8"))
+            if city_id in data:
+                return data[city_id]["weights"]
+        except Exception:
+            pass
+    return dict(_DEFAULT_WEIGHTS)
+
+
+def _save_weights(city_id: str, weights: dict[str, float]) -> None:
+    """Persist *weights* for *city_id* to disk."""
+    data: dict[str, Any] = {}
+    if _WEIGHTS_FILE.exists():
+        try:
+            data = json.loads(_WEIGHTS_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    data[city_id] = {
+        "weights": weights,
+        "updated_at": _utcnow(),
+    }
+    _WEIGHTS_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # ArcGIS parcel query — city-owned vacant lots
 # ─────────────────────────────────────────────────────────────────────────────
 
 import requests as _requests
+
+_ARCGIS_VIOLATIONS_URL = (
+    "https://services7.arcgis.com/xNUwUjOJqYE54USz/arcgis/rest/services/"
+    "Code_Violations/FeatureServer/0/query"
+)
 
 _ARCGIS_PARCEL_URL = (
     "https://services7.arcgis.com/xNUwUjOJqYE54USz/arcgis/rest/services/"
@@ -673,11 +739,86 @@ _ARCGIS_PARCEL_URL = (
 )
 
 
+# Maps ArcGIS CaseType values to the frontend 311 distress signal categories.
+_CASE_TYPE_CATEGORY: dict[str, str] = {
+    "NUISANCE":             "Illegal Dumping",
+    "OPEN VACANT":          "Vacant Lot",
+    "DEMOLITION":           "Abandoned Building",
+    "REPAIR":               "Abandoned Building",
+    "GENERIC":              "Abandoned Building",
+    "PARKING ON FRONT LAWN": "Illegal Dumping",
+}
+
+# All possible frontend categories — used to ensure every parcel has a full set.
+_ALL_SIGNAL_CATEGORIES = [
+    "Overgrown Vegetation",
+    "Illegal Dumping",
+    "Abandoned Building",
+    "Drug Activity",
+    "Vacant Lot",
+    "Noise Complaint",
+    "Graffiti",
+]
+
+
+def _casetype_to_category(case_type: str | None) -> str:
+    """Map an ArcGIS CaseType to a frontend display category."""
+    return _CASE_TYPE_CATEGORY.get((case_type or "").upper(), "Abandoned Building")
+
+
+def _fetch_violations_bulk(parcel_ids: list[str]) -> dict[str, dict]:
+    """
+    Fetch code violations for all parcel IDs in one query using an IN clause.
+
+    Returns a dict keyed by parcel_id with violation summary including
+    total, open count, and per-category counts.
+    """
+    if not parcel_ids:
+        return {}
+
+    ids_sql = ", ".join(f"'{pid}'" for pid in parcel_ids)
+    params = {
+        "where": f"ParcelNo IN ({ids_sql})",
+        "outFields": "ParcelNo,CaseType,CaseStatus",
+        "f": "json",
+        "resultRecordCount": 5000,
+    }
+    try:
+        resp = _requests.get(_ARCGIS_VIOLATIONS_URL, params=params, timeout=20)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exc:
+        logger.warning("Bulk violations query failed: %s", exc)
+        return {}
+
+    # Build per-parcel summary.
+    summaries: dict[str, dict] = {}
+    for feat in data.get("features", []):
+        a = feat.get("attributes", {})
+        pid = a.get("ParcelNo")
+        if not pid:
+            continue
+        if pid not in summaries:
+            summaries[pid] = {
+                "violation_count": 0,
+                "open_violations": 0,
+                "signal_categories": {cat: 0 for cat in _ALL_SIGNAL_CATEGORIES},
+            }
+        summaries[pid]["violation_count"] += 1
+        if (a.get("CaseStatus") or "").upper() == "OPEN":
+            summaries[pid]["open_violations"] += 1
+        category = _casetype_to_category(a.get("CaseType"))
+        summaries[pid]["signal_categories"][category] += 1
+
+    return summaries
+
+
 def _fetch_vacant_city_parcels() -> list[dict[str, Any]]:
     """
     Query the Montgomery ArcGIS surplus city properties layer.
 
     Filters: DISPLAY = 'YES' (publicly listed lots only — 79 parcels).
+    Also joins code violation counts (within exact parcel boundary) per lot.
 
     Returns a list of dicts ready to be serialised as GeoJSON-style features.
     """
@@ -698,11 +839,12 @@ def _fetch_vacant_city_parcels() -> list[dict[str, Any]]:
         raise HTTPException(status_code=502, detail=f"ArcGIS query failed: {exc}") from exc
 
     features = []
+    parcel_ids = []
+
     for feat in data.get("features", []):
         attrs = feat.get("attributes", {})
         geom  = feat.get("geometry", {})
 
-        # Compute centroid from polygon rings.
         lat, lon = None, None
         if "rings" in geom:
             ring = geom["rings"][0]
@@ -713,9 +855,12 @@ def _fetch_vacant_city_parcels() -> list[dict[str, Any]]:
         street_num = (attrs.get("STREET_NUM") or "").strip()
         street_nam = (attrs.get("STREET_NAM") or "").strip()
         address = f"{street_num} {street_nam}".strip() if street_num else street_nam
+        tax_map = attrs.get("TAX_MAP")
+        if tax_map:
+            parcel_ids.append(tax_map)
 
         features.append({
-            "parcel_id":  attrs.get("TAX_MAP"),
+            "parcel_id":  tax_map,
             "parcel_num": attrs.get("PARCEL_NUM"),
             "address":    address,
             "location":   (attrs.get("LOCATION") or "").strip(),
@@ -728,6 +873,16 @@ def _fetch_vacant_city_parcels() -> list[dict[str, Any]]:
             "lon":        lon,
             "rings":      geom.get("rings", []),
         })
+
+    # Batch-fetch violations for all parcels in one query and join.
+    violations_by_parcel = _fetch_violations_bulk(parcel_ids)
+    empty_signals = {cat: 0 for cat in _ALL_SIGNAL_CATEGORIES}
+
+    for feature in features:
+        v = violations_by_parcel.get(feature["parcel_id"], {})
+        feature["violation_count"]    = v.get("violation_count", 0)
+        feature["open_violations"]    = v.get("open_violations", 0)
+        feature["signal_categories"]  = v.get("signal_categories", dict(empty_signals))
 
     return features
 
@@ -767,6 +922,57 @@ def health_check() -> dict[str, Any]:
         "rag_llm_model": llm_info["model"],
         "rag_llm_configured": llm_info["configured"],
         "timestamp": _utcnow(),
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Endpoints — Score weights config
+# ─────────────────────────────────────────────────────────────────────────────
+
+_VALID_WEIGHT_KEYS = frozenset(_DEFAULT_WEIGHTS.keys())
+
+
+@app.get("/config/{city_id}/weights", summary="Get score weights for a city", tags=["Config"])
+def get_weights(city_id: str = Path(..., examples=["montgomery"])) -> dict[str, Any]:
+    """Returns the current score weights for *city_id*, or defaults if none saved."""
+    return {
+        "city_id": city_id,
+        "weights": _load_weights(city_id),
+    }
+
+
+@app.post("/config/{city_id}/weights", summary="Save score weights for a city", tags=["Config"])
+def save_weights(
+    city_id: str = Path(..., examples=["montgomery"]),
+    body: WeightsRequest = ...,
+) -> dict[str, Any]:
+    """
+    Persist score weights for *city_id*.
+
+    All 8 keys are required: ``heritage``, ``industrial``, ``activity``,
+    ``proximity``, ``economic``, ``vacancy``, ``flood``, ``311``.
+    Values must sum to 1.0 (±0.01 tolerance).
+    """
+    missing = _VALID_WEIGHT_KEYS - body.weights.keys()
+    if missing:
+        raise HTTPException(status_code=422, detail=f"Missing weight keys: {sorted(missing)}")
+
+    unknown = body.weights.keys() - _VALID_WEIGHT_KEYS
+    if unknown:
+        raise HTTPException(status_code=422, detail=f"Unknown weight keys: {sorted(unknown)}")
+
+    total = sum(body.weights.values())
+    if abs(total - 1.0) > 0.01:
+        raise HTTPException(status_code=422, detail=f"Weights must sum to 1.0, got {total:.4f}")
+
+    _save_weights(city_id, body.weights)
+    logger.info("Score weights saved for city '%s': %s", city_id, body.weights)
+
+    return {
+        "city_id":    city_id,
+        "weights":    body.weights,
+        "saved":      True,
+        "updated_at": _utcnow(),
     }
 
 
@@ -831,18 +1037,16 @@ def vacant_parcels() -> dict[str, Any]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Endpoint — Code violations for a surplus parcel
+# Endpoint — Code violations for a surplus parcel (0.3 mi radius)
 # ─────────────────────────────────────────────────────────────────────────────
 
-_ARCGIS_VIOLATIONS_URL = (
-    "https://services7.arcgis.com/xNUwUjOJqYE54USz/arcgis/rest/services/"
-    "Code_Violations/FeatureServer/0/query"
-)
+_VIOLATIONS_RADIUS_MILES = 0.3
+_VIOLATIONS_RADIUS_FEET  = _VIOLATIONS_RADIUS_MILES * 5280  # 1584 ft
 
 
 @app.get(
     "/map/vacant-parcels/{parcel_id}/violations",
-    summary="Code violations for a surplus parcel",
+    summary="311 distress signals within 0.3 mi of a surplus parcel",
     tags=["Map"],
 )
 def parcel_violations(
@@ -853,19 +1057,59 @@ def parcel_violations(
     ),
 ) -> dict[str, Any]:
     """
-    Returns all code enforcement violations for a city surplus parcel.
+    Returns code enforcement violations within 0.3 miles of the parcel centroid.
 
-    Use the ``parcel_id`` (``TAX_MAP`` field) from ``GET /map/vacant-parcels``.
+    Each violation is mapped to one of the frontend 311 distress signal categories:
+    Overgrown Vegetation, Illegal Dumping, Abandoned Building, Drug Activity,
+    Vacant Lot, Noise Complaint, Graffiti.
 
-    Each violation includes ``case_type``, ``case_status``, ``case_date``,
-    and counts are broken down by open vs. closed.
+    Summary includes total count, open/closed split, parcels scanned,
+    and per-category counts.
     """
+    # First fetch the parcel centroid from the surplus layer.
+    parcel_params = {
+        "where": f"TAX_MAP = '{parcel_id.replace(chr(39), '')}'",
+        "outFields": "TAX_MAP",
+        "returnGeometry": "true",
+        "outSR": "4326",
+        "f": "json",
+        "resultRecordCount": 1,
+    }
+    try:
+        pr = _requests.get(_ARCGIS_PARCEL_URL, params=parcel_params, timeout=15)
+        pr.raise_for_status()
+        pdata = pr.json()
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Parcel lookup failed: {exc}") from exc
+
+    feats = pdata.get("features", [])
+    if not feats:
+        raise HTTPException(status_code=404, detail=f"Parcel '{parcel_id}' not found.")
+
+    geom = feats[0].get("geometry", {})
+    lat, lon = None, None
+    if "rings" in geom:
+        ring = geom["rings"][0]
+        if ring:
+            lon = sum(pt[0] for pt in ring) / len(ring)
+            lat = sum(pt[1] for pt in ring) / len(ring)
+
+    if lat is None or lon is None:
+        raise HTTPException(status_code=422, detail="Could not compute parcel centroid.")
+
+    # Spatial query — violations within 0.3 miles of the centroid.
     params = {
-        "where": f"ParcelNo = '{parcel_id.replace(chr(39), '')}'",
-        "outFields": "OffenceNum,CaseDate,CaseType,CaseStatus,LienStatus,CouncilDistrict,ComplaintRem,Year",
+        "where": "1=1",
+        "outFields": "ParcelNo,OffenceNum,CaseDate,CaseType,CaseStatus,LienStatus,ComplaintRem,Year",
+        "geometry": f"{lon},{lat}",
+        "geometryType": "esriGeometryPoint",
+        "inSR": "4326",
+        "spatialRel": "esriSpatialRelWithin",
+        "distance": _VIOLATIONS_RADIUS_FEET,
+        "units": "esriSRUnit_Foot",
         "orderByFields": "CaseDate DESC",
         "f": "json",
-        "resultRecordCount": 500,
+        "resultRecordCount": 1000,
     }
     try:
         resp = _requests.get(_ARCGIS_VIOLATIONS_URL, params=params, timeout=15)
@@ -876,29 +1120,42 @@ def parcel_violations(
         raise HTTPException(status_code=502, detail=f"ArcGIS query failed: {exc}") from exc
 
     violations = []
+    parcels_scanned: set[str] = set()
+    category_counts = {cat: 0 for cat in _ALL_SIGNAL_CATEGORIES}
+
     for feat in data.get("features", []):
         a = feat.get("attributes", {})
+        category = _casetype_to_category(a.get("CaseType"))
+        category_counts[category] += 1
+        if a.get("ParcelNo"):
+            parcels_scanned.add(a["ParcelNo"])
         violations.append({
-            "offence_num":    a.get("OffenceNum"),
-            "case_date":      a.get("CaseDate"),
-            "case_type":      a.get("CaseType"),
-            "case_status":    a.get("CaseStatus"),
-            "lien_status":    a.get("LienStatus"),
-            "district":       a.get("CouncilDistrict"),
-            "complaint":      (a.get("ComplaintRem") or "").strip(),
-            "year":           a.get("Year"),
+            "offence_num": a.get("OffenceNum"),
+            "case_date":   a.get("CaseDate"),
+            "case_type":   a.get("CaseType"),
+            "category":    category,
+            "case_status": a.get("CaseStatus"),
+            "lien_status": a.get("LienStatus"),
+            "complaint":   (a.get("ComplaintRem") or "").strip(),
+            "year":        a.get("Year"),
+            "parcel_no":   a.get("ParcelNo"),
         })
 
-    open_count   = sum(1 for v in violations if v["case_status"] == "OPEN")
+    open_count   = sum(1 for v in violations if (v["case_status"] or "").upper() == "OPEN")
     closed_count = len(violations) - open_count
+    active_categories = [cat for cat, cnt in category_counts.items() if cnt > 0]
 
     return {
-        "parcel_id":    parcel_id,
-        "total":        len(violations),
-        "open":         open_count,
-        "closed":       closed_count,
-        "violations":   violations,
-        "fetched_at":   _utcnow(),
+        "parcel_id":         parcel_id,
+        "radius_miles":      _VIOLATIONS_RADIUS_MILES,
+        "parcels_scanned":   len(parcels_scanned),
+        "total":             len(violations),
+        "open":              open_count,
+        "closed":            closed_count,
+        "active_categories": active_categories,
+        "category_counts":   category_counts,
+        "violations":        violations,
+        "fetched_at":        _utcnow(),
     }
 
 

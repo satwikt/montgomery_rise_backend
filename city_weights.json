@@ -1,0 +1,15 @@
+{
+  "montgomery": {
+    "weights": {
+      "311": 0.03,
+      "heritage": 0.25,
+      "industrial": 0.25,
+      "activity": 0.15,
+      "proximity": 0.1,
+      "economic": 0.1,
+      "vacancy": 0.1,
+      "flood": 0.02
+    },
+    "updated_at": "2026-04-13T20:43:35.878394+00:00"
+  }
+}
