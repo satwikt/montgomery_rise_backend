@@ -726,6 +726,7 @@ def _fetch_vacant_city_parcels() -> list[dict[str, Any]]:
             "sq_ft":      attrs.get("SQ_FT"),
             "lat":        lat,
             "lon":        lon,
+            "rings":      geom.get("rings", []),
         })
 
     return features
@@ -826,6 +827,78 @@ def vacant_parcels() -> dict[str, Any]:
         "count": len(features),
         "parcels": features,
         "fetched_at": _utcnow(),
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Endpoint — Code violations for a surplus parcel
+# ─────────────────────────────────────────────────────────────────────────────
+
+_ARCGIS_VIOLATIONS_URL = (
+    "https://services7.arcgis.com/xNUwUjOJqYE54USz/arcgis/rest/services/"
+    "Code_Violations/FeatureServer/0/query"
+)
+
+
+@app.get(
+    "/map/vacant-parcels/{parcel_id}/violations",
+    summary="Code violations for a surplus parcel",
+    tags=["Map"],
+)
+def parcel_violations(
+    parcel_id: str = Path(
+        ...,
+        description="TAX_MAP parcel ID from /map/vacant-parcels, e.g. '04 09 32 1 019 008.000'",
+        examples=["04 09 32 1 019 008.000"],
+    ),
+) -> dict[str, Any]:
+    """
+    Returns all code enforcement violations for a city surplus parcel.
+
+    Use the ``parcel_id`` (``TAX_MAP`` field) from ``GET /map/vacant-parcels``.
+
+    Each violation includes ``case_type``, ``case_status``, ``case_date``,
+    and counts are broken down by open vs. closed.
+    """
+    params = {
+        "where": f"ParcelNo = '{parcel_id.replace(chr(39), '')}'",
+        "outFields": "OffenceNum,CaseDate,CaseType,CaseStatus,LienStatus,CouncilDistrict,ComplaintRem,Year",
+        "orderByFields": "CaseDate DESC",
+        "f": "json",
+        "resultRecordCount": 500,
+    }
+    try:
+        resp = _requests.get(_ARCGIS_VIOLATIONS_URL, params=params, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exc:
+        logger.warning("ArcGIS violations query failed: %s", exc)
+        raise HTTPException(status_code=502, detail=f"ArcGIS query failed: {exc}") from exc
+
+    violations = []
+    for feat in data.get("features", []):
+        a = feat.get("attributes", {})
+        violations.append({
+            "offence_num":    a.get("OffenceNum"),
+            "case_date":      a.get("CaseDate"),
+            "case_type":      a.get("CaseType"),
+            "case_status":    a.get("CaseStatus"),
+            "lien_status":    a.get("LienStatus"),
+            "district":       a.get("CouncilDistrict"),
+            "complaint":      (a.get("ComplaintRem") or "").strip(),
+            "year":           a.get("Year"),
+        })
+
+    open_count   = sum(1 for v in violations if v["case_status"] == "OPEN")
+    closed_count = len(violations) - open_count
+
+    return {
+        "parcel_id":    parcel_id,
+        "total":        len(violations),
+        "open":         open_count,
+        "closed":       closed_count,
+        "violations":   violations,
+        "fetched_at":   _utcnow(),
     }
 
 
