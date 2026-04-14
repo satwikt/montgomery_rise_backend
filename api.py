@@ -585,8 +585,8 @@ def _save_weights(city_id: str, weights: dict[str, float]) -> None:
 
 def _fetch_violations_bulk(parcel_ids: list[str] | None = None) -> dict[str, dict]:
     """
-    Fetch violation summary counts for a list of parcel IDs (used by
-    /map/vacant-parcels to join counts onto each surplus parcel).
+    Fetch violation details for a list of parcel IDs (used by
+    /map/vacant-parcels to join counts and full records onto each surplus parcel).
     Returns a dict keyed by parcel_id.
     """
     if not parcel_ids:
@@ -595,7 +595,7 @@ def _fetch_violations_bulk(parcel_ids: list[str] | None = None) -> dict[str, dic
     ids_sql = ", ".join(f"'{pid}'" for pid in parcel_ids)
     params = {
         "where": f"ParcelNo IN ({ids_sql})",
-        "outFields": "ParcelNo,CaseType,CaseStatus",
+        "outFields": "ParcelNo,CaseType,CaseStatus,OffenceNum,CaseDate,LienStatus,ComplaintRem,Year",
         "f": "json",
         "resultRecordCount": 5000,
     }
@@ -618,11 +618,34 @@ def _fetch_violations_bulk(parcel_ids: list[str] | None = None) -> dict[str, dic
                 "violation_count":  0,
                 "open_violations":  0,
                 "signal_categories": {cat: 0 for cat in _ALL_SIGNAL_CATEGORIES},
+                "violations": [],
             }
         summaries[pid]["violation_count"] += 1
         if (a.get("CaseStatus") or "").upper() == "OPEN":
             summaries[pid]["open_violations"] += 1
-        summaries[pid]["signal_categories"][_casetype_to_category(a.get("CaseType"))] += 1
+        category = _casetype_to_category(a.get("CaseType"))
+        summaries[pid]["signal_categories"][category] += 1
+
+        case_date_ms  = a.get("CaseDate")
+        case_date_str = None
+        if case_date_ms:
+            try:
+                case_date_str = datetime.fromtimestamp(
+                    case_date_ms / 1000, tz=timezone.utc
+                ).strftime("%Y-%m-%d")
+            except Exception:
+                case_date_str = str(case_date_ms)
+
+        summaries[pid]["violations"].append({
+            "offence_num": a.get("OffenceNum"),
+            "case_date":   case_date_str,
+            "case_type":   (a.get("CaseType") or "").strip(),
+            "category":    category,
+            "case_status": (a.get("CaseStatus") or "").strip(),
+            "lien_status": (a.get("LienStatus") or "").strip(),
+            "complaint":   (a.get("ComplaintRem") or "").strip(),
+            "year":        a.get("Year"),
+        })
 
     return summaries
 
@@ -696,6 +719,7 @@ def _fetch_vacant_city_parcels() -> list[dict[str, Any]]:
         feature["violation_count"]   = v.get("violation_count", 0)
         feature["open_violations"]   = v.get("open_violations", 0)
         feature["signal_categories"] = v.get("signal_categories", dict(empty_signals))
+        feature["violations"]        = v.get("violations", [])
 
     return features
 
